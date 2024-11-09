@@ -25,6 +25,7 @@ main(int argc, char **argv)
     //     return 1;
     // }
     // printf("%s\n", res->resp);
+    // printf("%ld\n", res->resp_code);
     // gh_client_response_free(res);
 
     // gh_client_response_t *res = gh_client_repo_releases_list("briandowns", "spinner");
@@ -94,14 +95,50 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_user_by_id_hovercard_get("galal-hussein");
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    gh_client_response_free(res);
+    // gh_client_response_t *res = gh_client_user_by_id_hovercard_get("galal-hussein");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_user_blocked_list();
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_user_blocked_by_id("galal-hussein");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%lu\n", res->resp_code);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_user_block_user_by_id("galal-hussein");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%lu\n", res->resp_code);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_user_unblock_user_by_id("galal-hussein");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%lu\n", res->resp_code);
+    // gh_client_response_free(res);
 
     /* always cleanup */
     gh_client_free();

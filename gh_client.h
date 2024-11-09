@@ -1,6 +1,9 @@
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
+#define GH_CLIENT_USER_BLOCKED_CODE     204
+#define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
+
 /**
  * Default response structure returned for each call
  * to the API. Contains the API response, the response code,
@@ -10,7 +13,7 @@ typedef struct {
     char *resp;
     char *err_msg;
     size_t size;
-    int resp_code;
+    long resp_code;
     int err_code;
 } gh_client_response_t;
 
@@ -121,6 +124,36 @@ gh_client_user_by_id_get(const char *username);
  */
 gh_client_response_t*
 gh_client_user_by_id_hovercard_get(const char *username);
+
+/**
+ * Retrieve a list of blocked users for the currently logged in user.
+ * The response memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_user_blocked_list();
+
+/**
+ * Checks if the given username is blocked by the currenty logged in
+ * user. If the response code is 204, the given user is blocked but 
+ * if the response code is 404, the given user is not blocked. The
+ * response memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_user_blocked_by_id(const char *username);
+
+/**
+ * Blocks a user by the given id. The response memory needs to be freed
+ * by the caller.
+ */
+gh_client_response_t*
+gh_client_user_block_user_by_id(const char *username);
+
+/**
+ * Unblocks a user by the given id. The response memory needs to be freed
+ * by the caller.
+ */
+gh_client_response_t*
+gh_client_user_unblock_user_by_id(const char *username);
 
 /**
  * Free the memory used by the client.
