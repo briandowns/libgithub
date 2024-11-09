@@ -6,10 +6,6 @@
 
 #include "gh_client.h"
 
-// curl --request GET
-// --url "https://api.github.com/octocat"
-// --header "Authorization: Bearer YOUR-TOKEN"
-// --header "X-GitHub-Api-Version: 2022-11-28"
 
 int
 main(int argc, char **argv)

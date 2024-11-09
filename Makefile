@@ -7,7 +7,7 @@ NAME    = libgithub
 
 UNAME_S = $(shell uname -s)
 
-# respect traditional UNIX path usage
+# respect traditional UNIX paths
 INCDIR  = /usr/local/include
 LIBDIR  = /usr/local/lib
 
