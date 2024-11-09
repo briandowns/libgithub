@@ -29,6 +29,8 @@ make install
 ## Install shared object and header
 
 ```sh
+make install
+```
 
 ## Features
 
