@@ -6,6 +6,10 @@
 
 #include "gh_client.h"
 
+#define GH_REQ_JSON_HEADER   "Accept: application/vnd.github+json"
+#define GH_REQ_VER_HEADER    "X-GitHub-Api-Version: 2022-11-28"
+#define GH_REQ_DEF_UA_HEADER "User-Agent: bd-gh-c-lib"
+
 static CURL *curl = NULL;
 static char *token = NULL;
 
@@ -113,13 +117,6 @@ gh_client_repo_releases_list(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
 
-    char *token = getenv("GITHUB_TOKEN");
-    if (token == NULL) {
-        char *err_msg = "github token not set in environment";
-        response->err_msg = calloc(1, strlen(err_msg)+1);
-        strcpy(response->err_msg, err_msg);
-        return response;
-    }
     char token_header[256];
     strcpy(token_header, "Authorization: Bearer ");
     strcat(token_header, token);
@@ -156,18 +153,12 @@ gh_client_repo_releases_list(const char *owner, const char *repo)
 }
 
 gh_client_response_t*
-gh_client_repo_releases_create(const char *owner, const char *repo, const char *data)
+gh_client_repo_releases_create(const char *owner, const char *repo,
+    const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
 
-    char *token = getenv("GITHUB_TOKEN");
-    if (token == NULL) {
-        char *err_msg = "github token not set in environment";
-        response->err_msg = calloc(1, strlen(err_msg)+1);
-        strcpy(response->err_msg, err_msg);
-        return response;
-    }
     char token_header[256];
     strcpy(token_header, "Authorization: Bearer ");
     strcat(token_header, token);
@@ -211,13 +202,6 @@ gh_client_repo_branches_list(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
 
-    char *token = getenv("GITHUB_TOKEN");
-    if (token == NULL) {
-        char *err_msg = "github token not set in environment";
-        response->err_msg = calloc(1, strlen(err_msg)+1);
-        strcpy(response->err_msg, err_msg);
-        return response;
-    }
     char token_header[256];
     strcpy(token_header, "Authorization: Bearer ");
     strcat(token_header, token);
@@ -254,26 +238,20 @@ gh_client_repo_branches_list(const char *owner, const char *repo)
 }
 
 gh_client_response_t*
-gh_client_repo_pull_request_list(const char *owner, const char *repo, enum gh_pull_request_state)
+gh_client_repo_pull_request_list(const char *owner, const char *repo,
+    gh_client_pull_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
 
-    char *token = getenv("GITHUB_TOKEN");
-    if (token == NULL) {
-        char *err_msg = "github token not set in environment";
-        response->err_msg = calloc(1, strlen(err_msg)+1);
-        strcpy(response->err_msg, err_msg);
-        return response;
-    }
     char token_header[256];
     strcpy(token_header, "Authorization: Bearer ");
     strcat(token_header, token);
 
-    chunk = curl_slist_append(chunk, "Accept: application/vnd.github+json");
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
-    chunk = curl_slist_append(chunk, "X-GitHub-Api-Version: 2022-11-28");
-    chunk = curl_slist_append(chunk, "User-Agent: bd-gh-c-lib");
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
     strcpy(url, "https://api.github.com/repos/");
@@ -282,7 +260,195 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo, enum gh_pu
     strcat(url, repo);
     strcat(url, "/pulls");
 
-    /* add closed status if necessary */
+    if (opts != NULL) {
+        int first_param_set = 0;
+        // set the list state. api def is open
+        if (opts->state == GH_PR_STATE_CLOSED) {
+            strcat(url, "?state=closed");
+            first_param_set = 1;
+        } else if (opts->state == GH_PR_STATE_MERGED) {
+            strcat(url, "?state=merged");
+            first_param_set = 1;
+        }
+
+        // set the list order. api def is desc
+        if (opts->order == GH_PR_ORDER_ASC) {
+            if (first_param_set) {
+                strcat(url, "&direction=asc");
+            }
+            strcat(url, "?direction=asc");
+        }
+    }
+
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)response);
+
+    CURLcode res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+    }
+    curl_slist_free_all(chunk);
+    free(url);
+
+    response->resp_code = res;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_pull_request_get(const char *owner, const char *repo,
+    const int unsigned id, gh_client_pull_req_opts_t *opts)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[256];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/repos/");
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/pulls/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", id);
+    strcat(url, id_val);
+
+    if (opts != NULL) {
+        // set the list state. api def is open
+        if (opts->state == GH_PR_STATE_CLOSED) {
+            strcat(url, "?state=closed");
+        } else if (opts->state == GH_PR_STATE_MERGED) {
+            strcat(url, "?state=merged");
+        }
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)response);
+
+    CURLcode res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+    }
+    curl_slist_free_all(chunk);
+    free(url);
+
+    response->resp_code = res;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_user_logged_in_get()
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[256];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/user");
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)response);
+
+    CURLcode res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+    }
+    curl_slist_free_all(chunk);
+    free(url);
+
+    response->resp_code = res;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_user_by_id_get(const char *username)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[256];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/users/");
+    strcat(url, username);
+
+    curl_easy_setopt(curl, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)response);
+
+    CURLcode res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                curl_easy_strerror(res));
+    }
+    curl_slist_free_all(chunk);
+    free(url);
+
+    response->resp_code = res;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_user_by_id_hovercard_get(const char *username)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[256];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/users/");
+    strcat(url, username);
+    strcat(url, "/hovercard");
 
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);

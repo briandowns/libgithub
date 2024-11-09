@@ -59,7 +59,46 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_repo_pull_request_list("briandowns", "spinner");
+    // gh_client_pull_req_opts_t opts = {
+    //     .order = GH_PR_ORDER_ASC,
+    // };
+    // gh_client_response_t *res = gh_client_repo_pull_request_list("briandowns", "spinner", &opts);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_repo_pull_request_get("briandowns", "spinner", 160, NULL);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_user_logged_in_get();
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_user_by_id_get("galal-hussein");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_user_by_id_hovercard_get("galal-hussein");
     if (res->err_msg != NULL) {
         printf("%s\n", res->err_msg);
         gh_client_response_free(res);
