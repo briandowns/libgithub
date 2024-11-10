@@ -90,12 +90,35 @@ gh_client_response_t*
 gh_client_octocat_says();
 
 /**
- * Retrieve a list of releases for the given repository
- * in JSON format. The response memory needs to be freed by the caller. 
+ * Retrieve a list of releases for the given repository. The response memory
+ * needs to be freed by the caller. 
  */
 gh_client_response_t*
 gh_client_repo_releases_list(const char *owner, const char *repo);
- 
+
+/**
+ * Retrieve the latest release for the given repository. The response memory
+ * needs to be freed by the caller. 
+ */
+gh_client_response_t*
+gh_client_repo_releases_latest(const char *owner, const char *repo);
+
+/**
+ * Retrieve a release by the given tag. The response memory needs to be freed
+ * by the caller. 
+ */
+gh_client_response_t*
+gh_client_repo_release_by_tag(const char *owner, const char *repo,
+                              const char *tag);
+
+/**
+ * Retrieve a release by the given id. The response memory needs to be freed by
+ * the caller. 
+ */
+gh_client_response_t*
+gh_client_repo_release_by_id(const char *owner, const char *repo,
+                             const unsigned int id);
+
 /**
  * Create a new release for the given repository and configuration.
  * The response memory needs to be freed by the caller.

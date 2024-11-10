@@ -38,6 +38,9 @@ make install
 #### Commits
 
 * List commits
+* Get a commit
+* Compare commits
+* Get PR from commit
 
 #### Branches
 
@@ -51,6 +54,10 @@ make install
 
 * List releases
 * Create a release
+* Generate release notes
+* Get latest
+* Get by tag
+* GEt by id
 
 #### Pull Requests
 

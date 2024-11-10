@@ -37,6 +37,33 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
+    // gh_client_response_t *res = gh_client_repo_releases_latest("briandowns", "spinner");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_repo_release_by_tag("briandowns", "spinner", "v1.23.1");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_repo_release_by_id("briandowns", "spinner", 160317840);
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    printf("%s\n", res->resp);
+    gh_client_response_free(res);
+
     // gh_client_response_t *res = gh_client_repo_branches_list("briandowns", "spinner");
     // if (res->err_msg != NULL) {
     //     printf("%s\n", res->err_msg);
@@ -112,14 +139,14 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_repo_commits_compare("briandowns", "spinner", "561dc95eeadf7fc57c2fe6ce2253f0f3361c0f75", "f878506b30a20e7b6c29cd17d93217f5ebd80b0b");
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    gh_client_response_free(res);
+    // gh_client_response_t *res = gh_client_repo_commits_compare("briandowns", "spinner", "561dc95eeadf7fc57c2fe6ce2253f0f3361c0f75", "f878506b30a20e7b6c29cd17d93217f5ebd80b0b");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
 
     // gh_client_pull_req_opts_t opts = {
     //     .order = GH_PR_ORDER_ASC,
