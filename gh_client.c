@@ -23,6 +23,15 @@
     curl_slist_free_all(chunk); \
     free(url);
 
+#define CURL_CALL_ERROR_CHECK \
+    if(res != CURLE_OK) { \
+        char *err_msg = (char *)curl_easy_strerror(res); \
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char)); \
+        strcpy(response->err_msg, err_msg); \
+        CALL_CLEANUP; \
+        return response; \
+    }
+
 static CURL *curl = NULL;
 static char *token = NULL;
 
@@ -148,16 +157,8 @@ gh_client_repo_releases_list(const char *owner, const char *repo)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -193,15 +194,43 @@ gh_client_repo_releases_create(const char *owner, const char *repo,
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
+    CURL_CALL_ERROR_CHECK;
+    CALL_CLEANUP;
 
-        CALL_CLEANUP;
+    return response;
+}
 
-        return response;
-    }
+gh_client_response_t*
+gh_client_repo_releases_gen_notes(const char *owner, const char *repo,
+                                  const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/releases/generate-notes");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
     CALL_CLEANUP;
 
     return response;
@@ -257,26 +286,14 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
             first_param_set ? strcat(url, "&until="), strcat(url, opts->until):
                 strcat(url, "?until="), strcat(url, opts->until);
         }
-        if (opts->until != NULL) {
-            first_param_set ? strcat(url, "&until="), strcat(url, opts->until):
-                strcat(url, "?until="), strcat(url, opts->until);
-        }
     }
 
     SET_BASIC_CURL_CONFIG;
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -312,16 +329,8 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -356,19 +365,49 @@ gh_client_repo_commit_get(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
+}
+
+gh_client_response_t*
+gh_client_repo_commits_compare(const char *owner, const char *repo,
+                               const char *base, const char *head)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/compare");
+    strcat(url, "/");
+    strcat(url, base);
+    strcat(url, "...");
+    strcat(url, base);
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response;  
 }
 
 gh_client_response_t*
@@ -397,16 +436,8 @@ gh_client_repo_branches_list(const char *owner, const char *repo)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -440,16 +471,8 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -486,16 +509,8 @@ gh_client_repo_branch_rename(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -532,16 +547,8 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -576,16 +583,8 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -638,16 +637,8 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -694,16 +685,8 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -731,16 +714,8 @@ gh_client_user_logged_in_get()
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -769,16 +744,8 @@ gh_client_user_by_id_get(const char *username)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -808,16 +775,8 @@ gh_client_user_by_id_hovercard_get(const char *username)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -845,16 +804,8 @@ gh_client_user_blocked_list()
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;
@@ -883,16 +834,8 @@ gh_client_user_blocked_by_id(const char *username)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response; 
@@ -922,16 +865,8 @@ gh_client_user_block_user_by_id(const char *username)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response; 
@@ -961,16 +896,8 @@ gh_client_user_unblock_user_by_id(const char *username)
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
 
-    if(res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
-        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-        strcpy(response->err_msg, err_msg);
-
-        CALL_CLEANUP;
-
-        return response;
-    }
     CALL_CLEANUP;
 
     return response;

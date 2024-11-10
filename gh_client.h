@@ -98,11 +98,26 @@ gh_client_repo_releases_list(const char *owner, const char *repo);
  
 /**
  * Create a new release for the given repository and configuration.
- * Reponse is in JSON format and the memory needs to be freed by the caller.
+ * The response memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_repo_releases_create(const char *owner, const char *repo,
                                const char *data);
+
+/**
+ * Generate release notes content for a release. The response memory needs to
+ * be freed by the caller.
+ * 
+ * data argument must be JSON in the following format:
+ * 
+ * tag_name (required)
+ * 
+ * {"tag_name":"v1.0.0","target_commitish":"main","previous_tag_name":"v0.9.2",
+ *  "configuration_file_path":".github/custom_release_config.yml"}
+ */
+gh_client_response_t*
+gh_client_repo_releases_gen_notes(const char *owner, const char *repo,
+                                  const char *data);
 
 /**
  * Retrieve commits for a given repository. The response memory needs to be
@@ -119,6 +134,16 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
 gh_client_response_t*
 gh_client_repo_commit_get(const char *owner, const char *repo,
                           const char *sha);
+
+/**
+ * Compare 2 commits. The response memory needs to be
+ * freed by the caller.
+ * 
+ * The format of hte 
+ */
+gh_client_response_t*
+gh_client_repo_commits_compare(const char *owner, const char *repo,
+                               const char *base, const char *head);
 
 /**
  * Retrieve the merged pull request that introduced the commit. The response

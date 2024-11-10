@@ -103,7 +103,16 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_repo_commit_get("briandowns", "spinner", "508a84e57e22df0247f1e8ccb81298692c0d679a");
+    // gh_client_response_t *res = gh_client_repo_commit_get("briandowns", "spinner", "508a84e57e22df0247f1e8ccb81298692c0d679a");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_repo_commits_compare("briandowns", "spinner", "561dc95eeadf7fc57c2fe6ce2253f0f3361c0f75", "f878506b30a20e7b6c29cd17d93217f5ebd80b0b");
     if (res->err_msg != NULL) {
         printf("%s\n", res->err_msg);
         gh_client_response_free(res);
