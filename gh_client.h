@@ -4,10 +4,15 @@
 #define GH_CLIENT_USER_BLOCKED_CODE     204
 #define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
+#define GH_API_BASE_URL  "https://api.github.com"
+#define GH_API_REPO_URL  GH_API_BASE_URL "/repos/"
+#define GH_API_USER_URL  GH_API_BASE_URL "/user"
+#define GH_API_USERS_URL GH_API_BASE_URL "/users/"
+
 /**
- * Default response structure returned for each call
- * to the API. Contains the API response, the response code,
- * response size, any error code, and message if applicable.
+ * Default response structure returned for each call to the API. Contains the
+ * API response, the response code, response size, any error code, and message
+ * if applicable.
  */
 typedef struct {
     char *resp;
@@ -18,8 +23,7 @@ typedef struct {
 } gh_client_response_t;
 
 /**
- * Contains the pull request states to 
- * choose from when listing.
+ * Contains the pull request states to choose from when listing.
  */
 enum gh_pull_request_state {
     GH_PR_STATE_OPENED = 0,
@@ -28,8 +32,7 @@ enum gh_pull_request_state {
 };
 
 /**
- * Contains the pull request order options
- * when listing.
+ * Contains the pull request order options when listing.
  */
 enum gh_pull_request_order {
     GH_PR_ORDER_DESC = 0,
@@ -37,14 +40,26 @@ enum gh_pull_request_order {
 };
 
 /**
- * Structure used to pass additional options
- * when listing pull requests.
- * 
+ * Structure used to pass additional options when listing pull requests.
  */
 typedef struct {
     enum gh_pull_request_state state;
     enum gh_pull_request_order order;
 } gh_client_pull_req_opts_t;
+
+/**
+ * Structure used to pass additional options when listing commits.
+ */
+typedef struct {
+    char *sha;
+    char *path;
+    char *author;
+    char *committer;
+    char *since;           // expected format: YYYY-MM-DDTHH:MM:SSZ
+    char *until;           // expected format: YYYY-MM-DDTHH:MM:SSZ
+    unsigned int per_page; // default: 30
+    unsigned int page;     // default: 1
+} gh_client_commits_list_opts_t;
 
 /**
  * Initialize the library.
@@ -72,14 +87,22 @@ gh_client_octocat_says();
  */
 gh_client_response_t*
 gh_client_repo_releases_list(const char *owner, const char *repo);
-
+ 
 /**
  * Create a new release for the given repository and configuration.
  * Reponse is in JSON format and the memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_repo_releases_create(const char *owner, const char *repo,
-    const char *data);
+                               const char *data);
+
+/**
+ * Retrieve commits for a given repository. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_commits_list(const char *owner, const char *repo,
+                            const gh_client_commits_list_opts_t *opts);
 
 /**
  * Retrieve a list of branches for the given repository
@@ -94,7 +117,7 @@ gh_client_repo_branches_list(const char *owner, const char *repo);
  */
 gh_client_response_t*
 gh_client_repo_branch_get(const char *owner, const char *repo,
-    const char *branch);
+                          const char *branch);
 
 /**
  * Rename the given branch. The response memory needs to be freed by the
@@ -105,7 +128,7 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_branch_rename(const char *owner, const char *repo,
-    const char *branch, const char *data);
+                             const char *branch, const char *data);
 
 /**
  * Sync the given branch in a fork to the given upstream. The response memory
@@ -116,7 +139,7 @@ gh_client_repo_branch_rename(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
-    const char *branch, const char *data);
+                                    const char *branch, const char *data);
 
 /**
  * Merge a branch. The response memory needs to be freed by the caller. 
@@ -127,7 +150,7 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_branch_merge(const char *owner, const char *repo,
-    const char *data);
+                            const char *data);
 
 /**
  * Retrieve a list of open pull requests. The response memory
@@ -135,7 +158,7 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_pull_request_list(const char *owner, const char *repo,
-    gh_client_pull_req_opts_t *opts);
+                                 const gh_client_pull_req_opts_t *opts);
 
 /**
  * Retrieve 1 pull request by id. order option in opts will be
@@ -143,7 +166,8 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_pull_request_get(const char *owner, const char *repo,
-    const unsigned int id, gh_client_pull_req_opts_t *opts);
+                                const unsigned int id,
+                                const gh_client_pull_req_opts_t *opts);
 
 /**
  * Retrieve account information for the user currently logged in. 

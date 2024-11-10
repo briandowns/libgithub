@@ -65,15 +65,15 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    const char *data = "{\"base\":\"master\",\"head\":\"feature/nothing\",\"commit_message\":\"Shipped cool_feature!\"}";
-    gh_client_response_t *res = gh_client_repo_branch_merge("briandowns", "devops-testing", data);
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    gh_client_response_free(res);
+    // const char *data = "{\"base\":\"master\",\"head\":\"feature/nothing\",\"commit_message\":\"Shipped cool_feature!\"}";
+    // gh_client_response_t *res = gh_client_repo_branch_merge("briandowns", "devops-testing", data);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
 
     // const char *data = "{\"tag_name\":\"v0.21.0\",\"target_commitish\":\"master\",\"name\":\"v.21.0\",\"body\":\"Description of the release\",\"draft\":false,\"prerelease\":false,\"generate_release_notes\":false}";
     // gh_client_response_t *res = gh_client_repo_releases_create("briandowns", "devops-testing", data);
@@ -84,6 +84,15 @@ main(int argc, char **argv)
     // }
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_repo_commits_list("briandowns", "devops-testing", NULL);
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    printf("%s\n", res->resp);
+    gh_client_response_free(res);
 
     // gh_client_pull_req_opts_t opts = {
     //     .order = GH_PR_ORDER_ASC,

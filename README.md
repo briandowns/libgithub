@@ -35,7 +35,12 @@ make install
 ## Features
 
 ### Repositories
+#### Commits
+
+* List commits
+
 #### Branches
+
 * List branches
 * Get a branch
 * Rename a branch
@@ -43,14 +48,17 @@ make install
 * Merge a branch
 
 #### Release
+
 * List releases
 * Create a release
 
 #### Pull Requests
+
 * List pull requests
 * Get a pull request by id
 
 ### Users
+
 * Get info for logged in user
 * Get info for user by id
 * List blocked users
