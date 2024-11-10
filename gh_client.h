@@ -89,6 +89,47 @@ gh_client_response_t*
 gh_client_repo_branches_list(const char *owner, const char *repo);
 
 /**
+ * Retrieve the given branch. The response memory needs to be freed by the
+ * caller. 
+ */
+gh_client_response_t*
+gh_client_repo_branch_get(const char *owner, const char *repo,
+    const char *branch);
+
+/**
+ * Rename the given branch. The response memory needs to be freed by the
+ * caller. 
+ * 
+ * data argument must be JSON in the following format:
+ * '{"new_name":"my_renamed_branch"}'
+ */
+gh_client_response_t*
+gh_client_repo_branch_rename(const char *owner, const char *repo,
+    const char *branch, const char *data);
+
+/**
+ * Sync the given branch in a fork to the given upstream. The response memory
+ * needs to be freed by the caller. 
+ * 
+ * data argument must be JSON in the following format:
+ * '{"branch":"<branch-name>"}'
+ */
+gh_client_response_t*
+gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
+    const char *branch, const char *data);
+
+/**
+ * Merge a branch. The response memory needs to be freed by the caller. 
+ * 
+ * data argument must be JSON in the following format:
+ * '{"base":"master","head":"cool_feature",
+ *   "commit_message":"Shipped cool_feature!"}'
+ */
+gh_client_response_t*
+gh_client_repo_branch_merge(const char *owner, const char *repo,
+    const char *data);
+
+/**
  * Retrieve a list of open pull requests. The response memory
  * needs to be freed by the caller.
  */

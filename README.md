@@ -37,6 +37,10 @@ make install
 ### Repositories
 #### Branches
 * List branches
+* Get a branch
+* Rename a branch
+* Sync to an upstream
+* Merge a branch
 
 #### Release
 * List releases

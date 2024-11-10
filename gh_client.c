@@ -97,7 +97,9 @@ gh_client_octocat_says()
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://api.github.com/octocat");
+    char *url = "https://api.github.com/octocat";
+    SET_BASIC_CURL_CONFIG;
+
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);
@@ -163,7 +165,7 @@ gh_client_repo_releases_list(const char *owner, const char *repo)
 
 gh_client_response_t*
 gh_client_repo_releases_create(const char *owner, const char *repo,
-    const char *data)
+                               const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -247,6 +249,185 @@ gh_client_repo_branches_list(const char *owner, const char *repo)
 }
 
 gh_client_response_t*
+gh_client_repo_branch_get(const char *owner, const char *repo,
+                          const char *branch)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/repos/");
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/branches/");
+    strcat(url, branch);
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    if(res != CURLE_OK) {
+        char *err_msg = (char *)curl_easy_strerror(res);
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+        strcpy(response->err_msg, err_msg);
+
+        CALL_CLEANUP;
+
+        return response;
+    }
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_branch_rename(const char *owner, const char *repo,
+                             const char *branch, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/repos/");
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/branches/");
+    strcat(url, branch);
+    strcat(url, "/rename");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    if(res != CURLE_OK) {
+        char *err_msg = (char *)curl_easy_strerror(res);
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+        strcpy(response->err_msg, err_msg);
+
+        CALL_CLEANUP;
+
+        return response;
+    }
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
+                                    const char *branch, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/repos/");
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/branches/");
+    strcat(url, branch);
+    strcat(url, "/merge-upstream");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    if(res != CURLE_OK) {
+        char *err_msg = (char *)curl_easy_strerror(res);
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+        strcpy(response->err_msg, err_msg);
+
+        CALL_CLEANUP;
+
+        return response;
+    }
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_branch_merge(const char *owner, const char *repo,
+                            const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, "https://api.github.com/repos/");
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/merges");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    if(res != CURLE_OK) {
+        char *err_msg = (char *)curl_easy_strerror(res);
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+        strcpy(response->err_msg, err_msg);
+
+        CALL_CLEANUP;
+
+        return response;
+    }
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
 gh_client_repo_pull_request_list(const char *owner, const char *repo,
     gh_client_pull_req_opts_t *opts)
 {
@@ -310,7 +491,8 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_pull_request_get(const char *owner, const char *repo,
-    const int unsigned id, gh_client_pull_req_opts_t *opts)
+                                const int unsigned id,
+                                gh_client_pull_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
