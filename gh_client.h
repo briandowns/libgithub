@@ -48,6 +48,14 @@ typedef struct {
 } gh_client_pull_req_opts_t;
 
 /**
+ * Base structure used to pass additional options.
+ */
+typedef struct {
+    unsigned int page;
+    unsigned int per_page;
+} gh_client_base_req_opts_t;
+
+/**
  * Structure used to pass additional options when listing commits.
  */
 typedef struct {
@@ -103,6 +111,22 @@ gh_client_repo_releases_create(const char *owner, const char *repo,
 gh_client_response_t*
 gh_client_repo_commits_list(const char *owner, const char *repo,
                             const gh_client_commits_list_opts_t *opts);
+
+/**
+ * Retrieve a single commit. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_commit_get(const char *owner, const char *repo,
+                          const char *sha);
+
+/**
+ * Retrieve the merged pull request that introduced the commit. The response
+ * memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_pr_commits_list(const char *owner, const char *repo,
+                               const char *sha);
 
 /**
  * Retrieve a list of branches for the given repository

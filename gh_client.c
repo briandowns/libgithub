@@ -283,6 +283,95 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
+gh_client_repo_pr_commits_list(const char *owner, const char *repo,
+                               const char *sha)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/commits");
+    strcat(url, "/");
+    strcat(url, sha);
+    strcat(url, "/pulls");
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    if(res != CURLE_OK) {
+        char *err_msg = (char *)curl_easy_strerror(res);
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+        strcpy(response->err_msg, err_msg);
+
+        CALL_CLEANUP;
+
+        return response;
+    }
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_commit_get(const char *owner, const char *repo,
+                          const char *sha)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/commits");
+    strcat(url, "/");
+    strcat(url, sha);
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    if(res != CURLE_OK) {
+        char *err_msg = (char *)curl_easy_strerror(res);
+        response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+        strcpy(response->err_msg, err_msg);
+
+        CALL_CLEANUP;
+
+        return response;
+    }
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
 gh_client_repo_branches_list(const char *owner, const char *repo)
 {
     gh_client_response_t *response = gh_client_response_new();

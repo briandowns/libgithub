@@ -85,7 +85,25 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_repo_commits_list("briandowns", "devops-testing", NULL);
+    // gh_client_response_t *res = gh_client_repo_commits_list("briandowns", "devops-testing", NULL);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_repo_pr_commits_list("briandowns", "devops-testing", "508a84e57e22df0247f1e8ccb81298692c0d679a");
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_repo_commit_get("briandowns", "spinner", "508a84e57e22df0247f1e8ccb81298692c0d679a");
     if (res->err_msg != NULL) {
         printf("%s\n", res->err_msg);
         gh_client_response_free(res);
