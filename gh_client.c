@@ -1,3 +1,5 @@
+#define _DEFAULT_SOURCE
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +62,10 @@ gh_client_response_free(gh_client_response_t *res)
             free(res->err_msg);
         }
 
+        if (res->rate_limit_data != NULL) {
+            free(res->rate_limit_data);
+        }
+
         free(res);
     }
 }
@@ -84,12 +90,52 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
 }
 
 /**
+ * Trim unnecessary whitespace from the given string. 
+ */
+static char*
+trim_whitespace(char *str)
+{
+    char *end;
+
+    while (isspace((unsigned char)*str)) {
+        str++;
+    }
+
+    if (*str == 0) {
+        return str;
+    }
+
+    end = str + strlen(str) - 1;
+    while (end > str && isspace((unsigned char)*end)) {
+        end--;
+    }
+
+    end[1] = '\0';
+
+    return str;
+}
+
+/**
+ * Process response header information.
+ */
+size_t header_cb(char *buffer, size_t size, size_t nmemb, void *userdata) {
+    size_t total_size = size * nmemb;
+    char *header_string = (char *)userdata;
+    strncat(header_string, buffer, total_size);
+
+    return total_size;
+}
+
+/**
  * Create and return a new pointer for response data.
  */
 static gh_client_response_t*
 gh_client_response_new()
 {
-    return calloc(1, sizeof(gh_client_response_t));
+    gh_client_response_t *resp = calloc(1, sizeof(gh_client_response_t));
+    resp->rate_limit_data = calloc(1, sizeof(gh_client_rate_limit_data_t));
+
+    return resp;
 }
 
 gh_client_response_t*
@@ -132,9 +178,11 @@ gh_client_octocat_says()
 }
 
 gh_client_response_t*
-gh_client_repo_releases_list(const char *owner, const char *repo)
+gh_client_repo_releases_list(const char *owner, const char *repo,
+                             const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
+    
     struct curl_slist *chunk = NULL;
 
     char token_header[TOKEN_HEADER_SIZE];
@@ -154,13 +202,28 @@ gh_client_repo_releases_list(const char *owner, const char *repo)
     strcat(url, "/releases");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    
+    // char *line = strtok(header_data, "\r\n");
+    // char *key = strsep(&line, ":");
+    // char *value = strsep(&line, "\n");
+    // printf("%s\n", key);
+    // if (strcmp(key, "x-ratelimit-limit") == 0) {
+    //     char *v = trim_whitespace(value);
+    //     response->rate_limit_data->limit = atoi(v);
+    // }
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
     CURL_CALL_ERROR_CHECK;
+        long header_size = 0;
+    curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &header_size);
+    printf("%lu\n", header_size);
+    char *header_data = calloc(1, header_size);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &header_data);
 
     CALL_CLEANUP;
-
+    
     return response;
 }
 
@@ -304,6 +367,85 @@ gh_client_repo_releases_create(const char *owner, const char *repo,
     CALL_CLEANUP;
 
     return response;
+}
+
+gh_client_response_t*
+gh_client_repo_releases_update(const char *owner, const char *repo,
+                               const unsigned int id, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/releases/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", id);
+    strcat(url, id_val);
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_releases_delete(const char *owner, const char *repo,
+                               const unsigned int id)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/releases/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", id);
+    strcat(url, id_val);
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    CALL_CLEANUP;
+
+    return response; 
 }
 
 gh_client_response_t*

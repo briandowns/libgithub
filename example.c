@@ -28,14 +28,16 @@ main(int argc, char **argv)
     // printf("%ld\n", res->resp_code);
     // gh_client_response_free(res);
 
-    // gh_client_response_t *res = gh_client_repo_releases_list("briandowns", "spinner");
-    // if (res->err_msg != NULL) {
-    //     printf("%s\n", res->err_msg);
-    //     gh_client_response_free(res);
-    //     return 1;
-    // }
-    // printf("%s\n", res->resp);
-    // gh_client_response_free(res);
+    gh_client_response_t *res = gh_client_repo_releases_list("rancher", "rke2", NULL);
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    //printf("%s\n", res->resp);
+    printf("Rate Limit: z%d\n", res->rate_limit_data->limit);
+    
+    gh_client_response_free(res);
 
     // gh_client_response_t *res = gh_client_repo_releases_latest("briandowns", "spinner");
     // if (res->err_msg != NULL) {
@@ -55,14 +57,14 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_repo_release_by_id("briandowns", "spinner", 160317840);
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    gh_client_response_free(res);
+    // gh_client_response_t *res = gh_client_repo_release_by_id("briandowns", "spinner", 160317840);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
 
     // gh_client_response_t *res = gh_client_repo_branches_list("briandowns", "spinner");
     // if (res->err_msg != NULL) {

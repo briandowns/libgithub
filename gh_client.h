@@ -10,6 +10,16 @@
 #define GH_API_USERS_URL GH_API_BASE_URL "/users/"
 
 /**
+ * Contains the rate limit information returned from each API call.
+ */
+typedef struct {
+    unsigned int limit;
+    unsigned int remaining;
+    unsigned int reset;
+    unsigned int used;
+} gh_client_rate_limit_data_t;
+
+/**
  * Default response structure returned for each call to the API. Contains the
  * API response, the response code, response size, any error code, and message
  * if applicable.
@@ -20,6 +30,7 @@ typedef struct {
     size_t size;
     long resp_code;
     int err_code;
+    gh_client_rate_limit_data_t *rate_limit_data;
 } gh_client_response_t;
 
 /**
@@ -48,12 +59,12 @@ typedef struct {
 } gh_client_pull_req_opts_t;
 
 /**
- * Base structure used to pass additional options.
+ * Structure used to pass pagination settings.
  */
 typedef struct {
     unsigned int page;
     unsigned int per_page;
-} gh_client_base_req_opts_t;
+} gh_client_req_list_opts_t;
 
 /**
  * Structure used to pass additional options when listing commits.
@@ -94,7 +105,8 @@ gh_client_octocat_says();
  * needs to be freed by the caller. 
  */
 gh_client_response_t*
-gh_client_repo_releases_list(const char *owner, const char *repo);
+gh_client_repo_releases_list(const char *owner, const char *repo,
+                             const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve the latest release for the given repository. The response memory
@@ -126,6 +138,27 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
 gh_client_response_t*
 gh_client_repo_releases_create(const char *owner, const char *repo,
                                const char *data);
+
+/**
+ * Update a release for the given repository and configuration. The response
+ * memory needs to be freed by the caller.
+ * 
+ * data argument must be JSON in the following format:
+ * 
+ * {"tag_name":"v1.0.0","target_commitish":"master","name":"v1.0.0",
+ *  "body":"Description of the release","draft":false,"prerelease":false}
+ */
+gh_client_response_t*
+gh_client_repo_releases_update(const char *owner, const char *repo,
+                               const unsigned int id, const char *data);
+
+/**
+ * Delete a release for the given repository and configuration. The response
+ * memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_releases_delete(const char *owner, const char *repo,
+                               const unsigned int id);
 
 /**
  * Generate release notes content for a release. The response memory needs to

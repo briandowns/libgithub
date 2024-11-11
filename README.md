@@ -57,7 +57,9 @@ make install
 * Generate release notes
 * Get latest
 * Get by tag
-* GEt by id
+* Get by id
+* Update a release
+* Delete a release
 
 #### Pull Requests
 
