@@ -13,10 +13,10 @@
  * Contains the rate limit information returned from each API call.
  */
 typedef struct {
-    unsigned int limit;
-    unsigned int remaining;
-    unsigned int reset;
-    unsigned int used;
+    int limit;
+    int remaining;
+    int reset;
+    int used;
 } gh_client_rate_limit_data_t;
 
 /**

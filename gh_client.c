@@ -118,10 +118,34 @@ trim_whitespace(char *str)
 /**
  * Process response header information.
  */
-size_t header_cb(char *buffer, size_t size, size_t nmemb, void *userdata) {
+size_t
+header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
+{
     size_t total_size = size * nmemb;
-    char *header_string = (char *)userdata;
-    strncat(header_string, buffer, total_size);
+    gh_client_response_t *response = (gh_client_response_t*)userdata;
+
+    char *line = strtok(buffer, "\r\n");
+    char *key = strsep(&line, ":");
+    char *value = strsep(&line, "\n");
+
+    if (key != NULL && value != NULL) {
+        if (strcmp(key, "x-ratelimit-limit") == 0) {
+            char *v = trim_whitespace(value);
+            response->rate_limit_data->limit = atoi(v);
+        }
+        if (strcmp(key, "x-ratelimit-remaining") == 0) {
+            char *v = trim_whitespace(value);
+            response->rate_limit_data->remaining = atoi(v);
+        }
+        if (strcmp(key, "x-ratelimit-reset") == 0) {
+            char *v = trim_whitespace(value);
+            response->rate_limit_data->reset = atoi(v);
+        }
+        if (strcmp(key, "x-ratelimit-used") == 0) {
+            char *v = trim_whitespace(value);
+            response->rate_limit_data->used = atoi(v);
+        }
+    }
 
     return total_size;
 }
@@ -203,24 +227,11 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
 
     SET_BASIC_CURL_CONFIG;
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     
-    // char *line = strtok(header_data, "\r\n");
-    // char *key = strsep(&line, ":");
-    // char *value = strsep(&line, "\n");
-    // printf("%s\n", key);
-    // if (strcmp(key, "x-ratelimit-limit") == 0) {
-    //     char *v = trim_whitespace(value);
-    //     response->rate_limit_data->limit = atoi(v);
-    // }
-
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
     CURL_CALL_ERROR_CHECK;
-        long header_size = 0;
-    curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &header_size);
-    printf("%lu\n", header_size);
-    char *header_data = calloc(1, header_size);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, &header_data);
 
     CALL_CLEANUP;
     

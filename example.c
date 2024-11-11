@@ -35,7 +35,10 @@ main(int argc, char **argv)
         return 1;
     }
     //printf("%s\n", res->resp);
-    printf("Rate Limit: z%d\n", res->rate_limit_data->limit);
+    printf("Limit: %d\n", res->rate_limit_data->limit);
+    printf("remaining: %d\n", res->rate_limit_data->remaining);
+    printf("reset: %d\n", res->rate_limit_data->reset);
+    printf("used: %d\n", res->rate_limit_data->used);
     
     gh_client_response_free(res);
 
