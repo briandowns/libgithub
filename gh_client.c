@@ -55,12 +55,13 @@ void
 gh_client_response_free(gh_client_response_t *res)
 {
     if (res != NULL) {
-        if (res->resp != NULL) {
-            free(res->resp);
-        }
-        if (res->err_msg != NULL) {
-            free(res->err_msg);
-        }
+        if (res->resp != NULL) free(res->resp);
+        if (res->err_msg != NULL) free(res->err_msg);
+        if (res->base_link != NULL) free(res->base_link);
+        if (res->first_link != NULL) free(res->first_link);
+        if (res->next_link != NULL) free(res->next_link);
+        if (res->prev_link != NULL) free(res->prev_link);
+        if (res->last_link != NULL) free(res->last_link);
 
         if (res->rate_limit_data != NULL) {
             if (res->rate_limit_data->resource != NULL) {
@@ -119,7 +120,7 @@ typedef struct {
     char *rel;
 } link_t;
 
-int
+static int
 parse_link_header(const char *header, link_t *links, int count)
 {
     int link_count = 0;
@@ -200,7 +201,6 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
             parse_link_header(value, links, link_count);
 
             for (int i = 0; i < link_count; i++) {
-                printf("%s %s\n", links[i].url, links[i].rel);
                 if (strcmp(links[i].rel, "first\"") == 0) {
                     response->first_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->first_link, links[i].url);
@@ -217,6 +217,13 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                 if (strcmp(links[i].rel, "last\"") == 0) {
                     response->last_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->last_link, links[i].url);
+                    
+                    char *base_link = strtok(links[i].url, "=");
+                    response->base_link = calloc(strlen(base_link)+1, sizeof(char));
+                    strcpy(response->base_link, base_link);
+
+                    char *page_count = strtok(NULL, "=");
+                    response->page_count = atoi(trim_whitespace(page_count));
                 }
 
                 free(links[i].url);
@@ -297,11 +304,17 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    strcpy(url, GH_API_REPO_URL);
-    strcat(url, owner);
-    strcat(url, "/");
-    strcat(url, repo);
-    strcat(url, "/releases");
+    if (opts != NULL) {
+        if (opts->page_url != NULL) {
+            strcpy(url, opts->page_url);
+        }
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/releases");
+    }
 
     SET_BASIC_CURL_CONFIG;
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);

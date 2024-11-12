@@ -4,6 +4,8 @@ libgithub is a C library used to interact with the Github REST API. Response dat
 
 Rate Limiting Data: Each response call from the API is returned with rate limit data and is stored and returned to the caller in the response struct.
 
+Full Github documentation [here](https://docs.github.com/en).
+
 ## Usage
 
 Initialize the library. The call requires the user's github token.

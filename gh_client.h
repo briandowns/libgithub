@@ -33,6 +33,8 @@ typedef struct {
     int err_code;
 
     // pagination fields
+    int page_count;
+    char *base_link;
     char *first_link;
 	char *next_link;
     char *prev_link;
@@ -72,6 +74,7 @@ typedef struct {
 typedef struct {
     unsigned int page;
     unsigned int per_page;
+    char *page_url;
 } gh_client_req_list_opts_t;
 
 /**
