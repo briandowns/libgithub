@@ -17,6 +17,7 @@ typedef struct {
     int remaining;
     int reset;
     int used;
+    char *resource;
 } gh_client_rate_limit_data_t;
 
 /**
@@ -30,6 +31,11 @@ typedef struct {
     size_t size;
     long resp_code;
     int err_code;
+
+    // pagination fields
+	char *next_link;
+	char *last_link;
+
     gh_client_rate_limit_data_t *rate_limit_data;
 } gh_client_response_t;
 
@@ -65,6 +71,19 @@ typedef struct {
     unsigned int page;
     unsigned int per_page;
 } gh_client_req_list_opts_t;
+
+/**
+ * Structure used to pass pagination settings.
+ */
+typedef struct {
+    unsigned int page;
+    unsigned int per_page;
+    unsigned int first;
+    unsigned int last;
+    char *after;
+    char *before;
+    char *cursor;
+} gh_client_req_list_cursor_opts_t;
 
 /**
  * Structure used to pass additional options when listing commits.

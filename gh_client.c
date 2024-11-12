@@ -63,6 +63,9 @@ gh_client_response_free(gh_client_response_t *res)
         }
 
         if (res->rate_limit_data != NULL) {
+            if (res->rate_limit_data->resource != NULL) {
+                free(res->rate_limit_data->resource);
+            }
             free(res->rate_limit_data);
         }
 
@@ -96,11 +99,9 @@ static char*
 trim_whitespace(char *str)
 {
     char *end;
-
     while (isspace((unsigned char)*str)) {
         str++;
     }
-
     if (*str == 0) {
         return str;
     }
@@ -109,10 +110,44 @@ trim_whitespace(char *str)
     while (end > str && isspace((unsigned char)*end)) {
         end--;
     }
-
     end[1] = '\0';
 
     return str;
+}
+
+typedef struct {
+    char *url;
+    char *rel;
+} link_t;
+
+int
+parse_link_header(const char *header, link_t *links, gh_client_response_t *res)
+{
+    int linkCount = 0;
+    //char *headerCopy = strdup(header);
+    char *token = strtok((char *)header, ",");
+
+    while (token != NULL && linkCount < 2) {
+        char *urlStart = strchr(token, '<');
+        char *urlEnd = strchr(token, '>');
+        char *relStart = strstr(token, "rel=\"");
+        char *relEnd = strchr(relStart, '\"');
+
+        if (urlStart && urlEnd && relStart && relEnd) {
+            *urlEnd = '\0';
+            *relEnd = '\0';
+
+            links[linkCount].url = strdup(urlStart + 1);
+            links[linkCount].rel = strdup(relStart + 5);
+
+            linkCount++;
+        }
+
+        token = strtok(NULL, ",");
+    }
+
+    //free(headerCopy);
+    return linkCount;
 }
 
 /**
@@ -127,6 +162,8 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
     char *line = strtok(buffer, "\r\n");
     char *key = strsep(&line, ":");
     char *value = strsep(&line, "\n");
+
+    //printf("%s - %s\n", key, value);
 
     if (key != NULL && value != NULL) {
         if (strcmp(key, "x-ratelimit-limit") == 0) {
@@ -144,6 +181,32 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
         if (strcmp(key, "x-ratelimit-used") == 0) {
             char *v = trim_whitespace(value);
             response->rate_limit_data->used = atoi(v);
+        }
+        if (strcmp(key, "x-ratelimit-resource") == 0) {
+            char *v = trim_whitespace(value);
+            response->rate_limit_data->resource = calloc(strlen(v), sizeof(char));
+            strcpy(response->rate_limit_data->resource, v);
+        }
+
+        if (strcmp(key, "link") == 0) {
+            link_t links[2];
+
+            parse_link_header(value, links, response);
+
+            for (int i = 0; i < 2; i++) {
+                if (strcmp(links[i].rel, "next") == 0) {
+                    response->next_link = calloc(strlen(links[i].url)+1, sizeof(char));
+                    strcpy(response->next_link, links[i].url);
+                }
+
+                if (strcmp(links[i].rel, "last") == 0) {
+                    response->last_link = calloc(strlen(links[i].url)+1, sizeof(char));
+                    strcpy(response->last_link, links[i].url);
+                }
+
+                free(links[i].url);
+                free(links[i].rel);
+            }
         }
     }
 

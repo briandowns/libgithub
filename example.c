@@ -34,12 +34,14 @@ main(int argc, char **argv)
         gh_client_response_free(res);
         return 1;
     }
-    //printf("%s\n", res->resp);
-    printf("Limit: %d\n", res->rate_limit_data->limit);
-    printf("remaining: %d\n", res->rate_limit_data->remaining);
-    printf("reset: %d\n", res->rate_limit_data->reset);
-    printf("used: %d\n", res->rate_limit_data->used);
-    
+    // printf("%s\n", res->resp);
+    // printf("Limit: %d\n", res->rate_limit_data->limit);
+    // printf("remaining: %d\n", res->rate_limit_data->remaining);
+    // printf("reset: %d\n", res->rate_limit_data->reset);
+    // printf("used: %d\n", res->rate_limit_data->used);
+    // printf("resource: %s\n", res->rate_limit_data->resource);
+    printf("Next: %s\n", res->next_link);
+    printf("Last: %s\n", res->last_link);
     gh_client_response_free(res);
 
     // gh_client_response_t *res = gh_client_repo_releases_latest("briandowns", "spinner");
