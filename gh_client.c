@@ -98,7 +98,6 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
 static char*
 trim_whitespace(char *str)
 {
-    char *end;
     while (isspace((unsigned char)*str)) {
         str++;
     }
@@ -106,7 +105,7 @@ trim_whitespace(char *str)
         return str;
     }
 
-    end = str + strlen(str) - 1;
+    char *end = str + strlen(str) - 1;
     while (end > str && isspace((unsigned char)*end)) {
         end--;
     }
@@ -121,33 +120,31 @@ typedef struct {
 } link_t;
 
 int
-parse_link_header(const char *header, link_t *links, gh_client_response_t *res)
+parse_link_header(const char *header, link_t *links, int count)
 {
-    int linkCount = 0;
-    //char *headerCopy = strdup(header);
+    int link_count = 0;
     char *token = strtok((char *)header, ",");
 
-    while (token != NULL && linkCount < 2) {
-        char *urlStart = strchr(token, '<');
-        char *urlEnd = strchr(token, '>');
-        char *relStart = strstr(token, "rel=\"");
-        char *relEnd = strchr(relStart, '\"');
+    while (token != NULL && link_count < count) {
+        char *url_start = strchr(token, '<');
+        char *url_end = strchr(token, '>');
+        char *rel_start = strstr(token, "rel=\"");
+        char *rel_end = strchr(rel_start, '\"');
 
-        if (urlStart && urlEnd && relStart && relEnd) {
-            *urlEnd = '\0';
-            *relEnd = '\0';
+        if (url_start && url_end && rel_start && rel_end) {
+            *url_end = '\0';
+            *rel_end = '\0';
 
-            links[linkCount].url = strdup(urlStart + 1);
-            links[linkCount].rel = strdup(relStart + 5);
+            links[link_count].url = strdup(url_start + 1);
+            links[link_count].rel = strdup(rel_start + 5);
 
-            linkCount++;
+            link_count++;
         }
 
         token = strtok(NULL, ",");
     }
 
-    //free(headerCopy);
-    return linkCount;
+    return link_count;
 }
 
 /**
@@ -189,17 +186,35 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
         }
 
         if (strcmp(key, "link") == 0) {
-            link_t links[2];
+            int link_count = 0;
+            for (int i = 0; value[i]; i++) {
+                if (value[i] == ',') {
+                    link_count++;
+                }
+            }
+            if (link_count > 0) {
+                link_count++;
+            }
 
-            parse_link_header(value, links, response);
+            link_t links[link_count];
+            parse_link_header(value, links, link_count);
 
-            for (int i = 0; i < 2; i++) {
-                if (strcmp(links[i].rel, "next") == 0) {
+            for (int i = 0; i < link_count; i++) {
+                printf("%s %s\n", links[i].url, links[i].rel);
+                if (strcmp(links[i].rel, "first\"") == 0) {
+                    response->first_link = calloc(strlen(links[i].url)+1, sizeof(char));
+                    strcpy(response->first_link, links[i].url);
+                }
+                if (strcmp(links[i].rel, "prev\"") == 0) {
+                    response->prev_link = calloc(strlen(links[i].url)+1, sizeof(char));
+                    strcpy(response->prev_link, links[i].url);
+                }
+                if (strcmp(links[i].rel, "next\"") == 0) {
                     response->next_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->next_link, links[i].url);
                 }
 
-                if (strcmp(links[i].rel, "last") == 0) {
+                if (strcmp(links[i].rel, "last\"") == 0) {
                     response->last_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->last_link, links[i].url);
                 }

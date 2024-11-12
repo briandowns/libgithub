@@ -33,7 +33,9 @@ typedef struct {
     int err_code;
 
     // pagination fields
+    char *first_link;
 	char *next_link;
+    char *prev_link;
 	char *last_link;
 
     gh_client_rate_limit_data_t *rate_limit_data;
