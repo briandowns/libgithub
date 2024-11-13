@@ -1,6 +1,8 @@
 # libgithub
+go-github is a Go client library for accessing the [GitHub API v3][].
+libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en).
 
-libgithub is a C library used to interact with the Github REST API. Response data is returned in JSON format however the caller is responsible for how to handle the data.
+Response data is returned in JSON format however the caller is responsible for how to handle the data.
 
 Rate Limiting Data: Each response call from the API is returned with rate limit data and is stored and returned to the caller in the response struct.
 
@@ -41,13 +43,6 @@ make install
 List calls support pagination.
 
 ### Repositories
-#### Commits
-
-* List commits
-* Get a commit
-* Compare commits
-* Get PR from commit
-
 #### Branches
 
 * List branches
@@ -55,6 +50,18 @@ List calls support pagination.
 * Rename a branch
 * Sync to an upstream
 * Merge a branch
+
+#### Commits
+
+* List commits
+* Get a commit
+* Compare commits
+* Get PR from commit
+
+#### Pull Requests
+
+* List pull requests
+* Get a pull request by id
 
 #### Release
 
@@ -67,11 +74,6 @@ List calls support pagination.
 * Update a release
 * Delete a release
 
-#### Pull Requests
-
-* List pull requests
-* Get a pull request by id
-
 ### Users
 
 * Get info for logged in user
@@ -83,6 +85,10 @@ List calls support pagination.
 ## Requirements / Dependencies
 
 * libcurl
+
+## Contributing
+
+Please feel free to open a PR!
 
 ## Contact
 

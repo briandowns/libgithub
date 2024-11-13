@@ -19,7 +19,7 @@ jobs:
     - name: Force Pull
       run: git pull origin master
     - name: Install Dependencies
-      run: sudo apt install -y make build-essential libcurl libcurl-dev libcurl4-openssl-dev libcurl4-gnutls-dev
+      run: sudo apt install -y make build-essential libcurl4 libcurl-dev libcurl4-openssl-dev libcurl4-gnutls-dev
     - name: Compile Library and Example
       run: |
         make && make example
