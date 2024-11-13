@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  run-example:
+    name: Example
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: master
+    - name: Force Pull
+      run: git pull origin master
+    - name: Install Dependencies
+      run: sudo apt install -y make build-essential libcurl libcurl-dev libcurl4-openssl-dev libcurl4-gnutls-dev
+    - name: Compile Library and Example
+      run: |
+        make && make example
