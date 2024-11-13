@@ -18,25 +18,29 @@ main(int argc, char **argv)
 
     gh_client_init(token);
 
-    gh_client_response_t *res = gh_client_repo_releases_list("rancher", "rke2", NULL);
+    gh_client_req_list_opts_t opts = {
+            .per_page = 100
+        };
+    gh_client_response_t *res = gh_client_repo_releases_list("rancher", "rke2", &opts);
     if (res->err_msg != NULL) {
         fprintf(stderr, "%s\n", res->err_msg);
         gh_client_response_free(res);
         return 1;
     }
-    
-    while (res->next_link != NULL) {
-        gh_client_req_list_opts_t *opts = calloc(1, sizeof(gh_client_req_list_opts_t));
-        opts->page_url = calloc(4096, sizeof(char));
-        strcpy(opts->page_url, res->next_link);
-        res = gh_client_repo_releases_list("rancher", "rke2", opts);
-        if (res->err_msg != NULL) {
-            printf("%s\n", res->err_msg);
-            gh_client_response_free(res);
-            return 1;
-        }
-        printf("%s\n", res->next_link);
-    }
+    printf("pages: %d\n", res->page_count);
+    // while (res->next_link != NULL) {
+    //     gh_client_req_list_opts_t opts = {
+    //         .per_page = 1,
+    //         .page_url = res->next_link
+    //     };
+    //     res = gh_client_repo_releases_list("golang", "go", &opts);
+    //     if (res->err_msg != NULL) {
+    //         fprintf(stderr, "%s\n", res->err_msg);
+    //         gh_client_response_free(res);
+    //         return 1;
+    //     }
+    //     printf("%s\n", res->next_link);
+    // }
 
     gh_client_response_free(res);
 

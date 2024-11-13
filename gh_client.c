@@ -120,6 +120,9 @@ typedef struct {
     char *rel;
 } link_t;
 
+/**
+ * Parse out the URLs and info from the link header.
+ */
 static int
 parse_link_header(const char *header, link_t *links, int count)
 {
@@ -161,7 +164,7 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
     char *key = strsep(&line, ":");
     char *value = strsep(&line, "\n");
 
-    //printf("%s - %s\n", key, value);
+    printf("%s - %s\n", key, value);
 
     if (key != NULL && value != NULL) {
         if (strcmp(key, "x-ratelimit-limit") == 0) {
@@ -218,11 +221,13 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                     response->last_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->last_link, links[i].url);
                     
-                    char *base_link = strtok(links[i].url, "=");
+                    char *base_link = strtok(links[i].url, "&page=");
+                    printf("%s\n", base_link);
                     response->base_link = calloc(strlen(base_link)+1, sizeof(char));
                     strcpy(response->base_link, base_link);
 
-                    char *page_count = strtok(NULL, "=");
+                    char *page_count = strtok(NULL, "&page=");
+                    printf("%s\n", page_count);
                     response->page_count = atoi(trim_whitespace(page_count));
                 }
 
@@ -304,10 +309,8 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    if (opts != NULL) {
-        if (opts->page_url != NULL) {
-            strcpy(url, opts->page_url);
-        }
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
     } else {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
@@ -315,6 +318,17 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
         strcat(url, repo);
         strcat(url, "/releases");
     }
+
+    if (opts != NULL) {
+        if (opts->per_page != 0) {
+            strcat(url, "?per_page=");
+
+            char pp_val[11] = {0};
+            sprintf(pp_val, "%d", opts->per_page);
+            strcat(url, pp_val);
+        }
+    }
+    printf("url: %s\n", url);
 
     SET_BASIC_CURL_CONFIG;
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);

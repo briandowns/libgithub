@@ -72,7 +72,6 @@ typedef struct {
  * Structure used to pass pagination settings.
  */
 typedef struct {
-    unsigned int page;
     unsigned int per_page;
     char *page_url;
 } gh_client_req_list_opts_t;
