@@ -163,8 +163,6 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
     char *key = strsep(&line, ":");
     char *value = strsep(&line, "\n");
 
-    printf("%s - %s\n", key, value);
-
     if (key != NULL && value != NULL) {
         if (strcmp(key, "x-ratelimit-limit") == 0) {
             char *v = trim_whitespace(value);
@@ -267,7 +265,7 @@ gh_client_octocat_says()
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
 
-    if(res != CURLE_OK) {
+    if (res != CURLE_OK) {
         char *err_msg = (char *)curl_easy_strerror(res);
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
         strcpy(response->err_msg, err_msg);
@@ -299,6 +297,7 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
+
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
     } else {
@@ -309,16 +308,13 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
         strcat(url, "/releases");
     }
 
-    if (opts != NULL) {
-        if (opts->per_page != 0) {
-            strcat(url, "?per_page=");
+    if (opts != NULL && opts->per_page > 30) {
+        strcat(url, "?per_page=");
 
-            char pp_val[11] = {0};
-            sprintf(pp_val, "%d", opts->per_page);
-            strcat(url, pp_val);
-        }
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
     }
-    printf("url: %s\n", url);
 
     SET_BASIC_CURL_CONFIG;
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
@@ -440,8 +436,8 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
-gh_client_repo_releases_create(const char *owner, const char *repo,
-                               const char *data)
+gh_client_repo_release_create(const char *owner, const char *repo,
+                              const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -476,8 +472,8 @@ gh_client_repo_releases_create(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
-gh_client_repo_releases_update(const char *owner, const char *repo,
-                               const unsigned int id, const char *data)
+gh_client_repo_release_update(const char *owner, const char *repo,
+                              const unsigned int id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -516,8 +512,8 @@ gh_client_repo_releases_update(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
-gh_client_repo_releases_delete(const char *owner, const char *repo,
-                               const unsigned int id)
+gh_client_repo_release_delete(const char *owner, const char *repo,
+                              const unsigned int id)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -555,8 +551,8 @@ gh_client_repo_releases_delete(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
-gh_client_repo_releases_gen_notes(const char *owner, const char *repo,
-                                  const char *data)
+gh_client_repo_release_gen_notes(const char *owner, const char *repo,
+                                 const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -607,11 +603,15 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    strcpy(url, GH_API_REPO_URL);
-    strcat(url, owner);
-    strcat(url, "/");
-    strcat(url, repo);
-    strcat(url, "/commits");
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/commits");
+    }
 
     if (opts != NULL) {
         int first_param_set = 0;
@@ -625,11 +625,13 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
                 strcat(url, "?path="), strcat(url, opts->path);
         }
         if (opts->author != NULL) {
-            first_param_set ? strcat(url, "&author="), strcat(url, opts->author):
+            first_param_set ? strcat(url, "&author="),
+                strcat(url, opts->author):
                 strcat(url, "?author="), strcat(url, opts->author);
         }
         if (opts->committer != NULL) {
-            first_param_set ? strcat(url, "&committer="), strcat(url, opts->committer):
+            first_param_set ? strcat(url, "&committer="),
+                strcat(url, opts->committer):
                 strcat(url, "?committer="), strcat(url, opts->committer);
         }
         if (opts->since != NULL) {
@@ -639,6 +641,14 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
         if (opts->until != NULL) {
             first_param_set ? strcat(url, "&until="), strcat(url, opts->until):
                 strcat(url, "?until="), strcat(url, opts->until);
+        }
+        if (opts->per_page > 30) {
+            char pp_val[11] = {0};
+            first_param_set ? strcat(url, "&per_page="),
+                sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
+                strcat(url, "?per_page="),
+                sprintf(pp_val, "%d", opts->per_page),
+                strcat(url, pp_val);
         }
     }
 
@@ -655,7 +665,8 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_pr_commits_list(const char *owner, const char *repo,
-                               const char *sha)
+                               const char *sha,
+                               const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -670,14 +681,27 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    strcpy(url, GH_API_REPO_URL);
-    strcat(url, owner);
-    strcat(url, "/");
-    strcat(url, repo);
-    strcat(url, "/commits");
-    strcat(url, "/");
-    strcat(url, sha);
-    strcat(url, "/pulls");
+    
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/commits");
+        strcat(url, "/");
+        strcat(url, sha);
+        strcat(url, "/pulls");
+    }
+
+    if (opts != NULL && opts->per_page > 30) {
+        strcat(url, "?per_page=");
+
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
+    }
 
     SET_BASIC_CURL_CONFIG;
 
@@ -765,7 +789,8 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
-gh_client_repo_branches_list(const char *owner, const char *repo)
+gh_client_repo_branches_list(const char *owner, const char *repo,
+                             const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -780,11 +805,24 @@ gh_client_repo_branches_list(const char *owner, const char *repo)
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    strcpy(url, GH_API_REPO_URL);
-    strcat(url, owner);
-    strcat(url, "/");
-    strcat(url, repo);
-    strcat(url, "/branches");
+    
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/branches");
+    }
+
+    if (opts != NULL && opts->per_page > 30) {
+        strcat(url, "?per_page=");
+
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
+    }
 
     SET_BASIC_CURL_CONFIG;
 
@@ -961,14 +999,20 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    strcpy(url, GH_API_REPO_URL);
-    strcat(url, owner);
-    strcat(url, "/");
-    strcat(url, repo);
-    strcat(url, "/pulls");
+
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/pulls");
+    }
 
     if (opts != NULL) {
         int first_param_set = 0;
+
         if (opts->state == GH_PR_STATE_CLOSED) {
             strcat(url, "?state=closed");
             first_param_set = 1;
@@ -979,10 +1023,8 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
 
         // set the list order. api def is desc
         if (opts->order == GH_PR_ORDER_ASC) {
-            if (first_param_set) {
-                strcat(url, "&direction=asc");
-            }
-            strcat(url, "?direction=asc");
+            first_param_set ? strcat(url, "&direction=asc"):
+                strcat(url, "?direction=asc");
         }
     }
 
@@ -1136,7 +1178,7 @@ gh_client_user_by_id_hovercard_get(const char *username)
 }
 
 gh_client_response_t*
-gh_client_user_blocked_list()
+gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1151,7 +1193,21 @@ gh_client_user_blocked_list()
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(2048, sizeof(char));
-    strcpy(url, GH_API_USER_URL "/blocks");
+    
+
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_USER_URL "/blocks");
+    }
+
+    if (opts != NULL && opts->per_page > 30) {
+        strcat(url, "?per_page=");
+
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
+    }
 
     SET_BASIC_CURL_CONFIG;
 

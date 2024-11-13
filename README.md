@@ -38,6 +38,8 @@ make install
 
 ## Features
 
+List calls support pagination.
+
 ### Repositories
 #### Commits
 

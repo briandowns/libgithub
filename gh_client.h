@@ -64,6 +64,8 @@ enum gh_pull_request_order {
 typedef struct {
     enum gh_pull_request_state state;
     enum gh_pull_request_order order;
+    unsigned int per_page;
+    char *page_url;
 } gh_client_pull_req_opts_t;
 
 /**
@@ -98,7 +100,7 @@ typedef struct {
     char *since;           // expected format: YYYY-MM-DDTHH:MM:SSZ
     char *until;           // expected format: YYYY-MM-DDTHH:MM:SSZ
     unsigned int per_page; // default: 30
-    unsigned int page;     // default: 1
+    char *page_url;
 } gh_client_commits_list_opts_t;
 
 /**
@@ -157,8 +159,8 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
  * The response memory needs to be freed by the caller.
  */
 gh_client_response_t*
-gh_client_repo_releases_create(const char *owner, const char *repo,
-                               const char *data);
+gh_client_repo_release_create(const char *owner, const char *repo,
+                              const char *data);
 
 /**
  * Update a release for the given repository and configuration. The response
@@ -170,16 +172,16 @@ gh_client_repo_releases_create(const char *owner, const char *repo,
  *  "body":"Description of the release","draft":false,"prerelease":false}
  */
 gh_client_response_t*
-gh_client_repo_releases_update(const char *owner, const char *repo,
-                               const unsigned int id, const char *data);
+gh_client_repo_release_update(const char *owner, const char *repo,
+                              const unsigned int id, const char *data);
 
 /**
  * Delete a release for the given repository and configuration. The response
  * memory needs to be freed by the caller.
  */
 gh_client_response_t*
-gh_client_repo_releases_delete(const char *owner, const char *repo,
-                               const unsigned int id);
+gh_client_repo_release_delete(const char *owner, const char *repo,
+                              const unsigned int id);
 
 /**
  * Generate release notes content for a release. The response memory needs to
@@ -193,8 +195,8 @@ gh_client_repo_releases_delete(const char *owner, const char *repo,
  *  "configuration_file_path":".github/custom_release_config.yml"}
  */
 gh_client_response_t*
-gh_client_repo_releases_gen_notes(const char *owner, const char *repo,
-                                  const char *data);
+gh_client_repo_release_gen_notes(const char *owner, const char *repo,
+                                 const char *data);
 
 /**
  * Retrieve commits for a given repository. The response memory needs to be
@@ -228,14 +230,16 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_pr_commits_list(const char *owner, const char *repo,
-                               const char *sha);
+                               const char *sha,
+                               const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve a list of branches for the given repository
  * in JSON format. The response memory needs to be freed by the caller. 
  */
 gh_client_response_t*
-gh_client_repo_branches_list(const char *owner, const char *repo);
+gh_client_repo_branches_list(const char *owner, const char *repo,
+                             const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve the given branch. The response memory needs to be freed by the
