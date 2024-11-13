@@ -33,8 +33,6 @@ typedef struct {
     int err_code;
 
     // pagination fields
-    int page_count;
-    char *base_link;
     char *first_link;
 	char *next_link;
     char *prev_link;

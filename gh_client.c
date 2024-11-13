@@ -57,7 +57,6 @@ gh_client_response_free(gh_client_response_t *res)
     if (res != NULL) {
         if (res->resp != NULL) free(res->resp);
         if (res->err_msg != NULL) free(res->err_msg);
-        if (res->base_link != NULL) free(res->base_link);
         if (res->first_link != NULL) free(res->first_link);
         if (res->next_link != NULL) free(res->next_link);
         if (res->prev_link != NULL) free(res->prev_link);
@@ -220,15 +219,6 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                 if (strcmp(links[i].rel, "last\"") == 0) {
                     response->last_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->last_link, links[i].url);
-                    
-                    char *base_link = strtok(links[i].url, "&page=");
-                    printf("%s\n", base_link);
-                    response->base_link = calloc(strlen(base_link)+1, sizeof(char));
-                    strcpy(response->base_link, base_link);
-
-                    char *page_count = strtok(NULL, "&page=");
-                    printf("%s\n", page_count);
-                    response->page_count = atoi(trim_whitespace(page_count));
                 }
 
                 free(links[i].url);
