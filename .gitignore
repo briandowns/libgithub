@@ -7,5 +7,6 @@
 bin/*
 tests/tests
 example
+pagination
 libgithub.dylib
 libgithub.so
