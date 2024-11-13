@@ -1,12 +1,6 @@
 # libgithub
-go-github is a Go client library for accessing the [GitHub API v3][].
+
 libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en).
-
-Response data is returned in JSON format however the caller is responsible for how to handle the data.
-
-Rate Limiting Data: Each response call from the API is returned with rate limit data and is stored and returned to the caller in the response struct.
-
-Full Github documentation [here](https://docs.github.com/en).
 
 ## Usage
 
@@ -16,13 +10,7 @@ Initialize the library. The call requires the user's github token.
 gh_client_init(token);
 ```
 
-## Example 
-
-Build the example:
-
-```sh
-make example
-```
+Response data is returned in JSON format however the caller is responsible for how to handle the data.
 
 ## Build shared object
 
@@ -32,10 +20,12 @@ To build the shared object:
 make install
 ```
 
-## Install shared object and header
+## Example 
+
+Build the example:
 
 ```sh
-make install
+make example
 ```
 
 ## Features
@@ -81,6 +71,10 @@ List calls support pagination.
 * List blocked users
 * Block a user
 * Unblock a user
+
+### Rate Limit
+
+Each response from the API includes rate limit data. This information is stored in the `rate_limit_data` field on the response struct.
 
 ## Requirements / Dependencies
 
