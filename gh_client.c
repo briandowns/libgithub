@@ -1251,7 +1251,7 @@ gh_client_user_blocked_by_id(const char *username)
 }
 
 gh_client_response_t*
-gh_client_user_block_user_by_id(const char *username)
+gh_client_user_block_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1282,7 +1282,7 @@ gh_client_user_block_user_by_id(const char *username)
 }
 
 gh_client_response_t*
-gh_client_user_unblock_user_by_id(const char *username)
+gh_client_user_unblock_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;

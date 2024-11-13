@@ -68,6 +68,7 @@ List calls support pagination.
 
 * Get info for logged in user
 * Get info for user by id
+* Get hovercard info
 * List blocked users
 * Block a user
 * Unblock a user
