@@ -1338,8 +1338,118 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
         int first_param_set = 0;
 
         if (opts->labels != NULL) {
-            first_param_set ? strcat(url, "&sha="), strcat(url, opts->labels):
-                strcat(url, "?sha="), strcat(url, opts->labels);           
+            first_param_set ? strcat(url, "&labels="),
+                strcat(url, opts->labels):
+                strcat(url, "?labels="), strcat(url, opts->labels);           
+        }
+        if (opts->since != NULL) {
+            first_param_set ? strcat(url, "&since="), strcat(url, opts->since):
+                strcat(url, "?since="), strcat(url, opts->since);
+        }
+        if (opts->per_page > 30) {
+            char pp_val[11] = {0};
+            first_param_set ? strcat(url, "&per_page="),
+                sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
+                strcat(url, "?per_page="),
+                sprintf(pp_val, "%d", opts->per_page),
+                strcat(url, pp_val);
+        }
+        if (opts->state == GH_ITEM_STATE_CLOSED) {
+            first_param_set ? strcat(url, "&state=closed"):
+                strcat(url, "?state=closed");
+        } else if (opts->state == GH_ITEM_STATE_ALL) {
+            first_param_set ? strcat(url, "?state=all"):
+                strcat(url, "?state=all");
+        }
+
+        if (opts->filter == GH_ISSUE_FILTER_ALL) {
+            first_param_set ? strcat(url, "&filter=all"):
+                strcat(url, "?filter=all");
+        } else if (opts->filter == GH_ISSUE_FILTER_CREATED) {
+            first_param_set ? strcat(url, "?filter=created"):
+                strcat(url, "?filter=created");
+        } else if (opts->filter == GH_ISSUE_FILTER_MENTIONED) {
+            first_param_set ? strcat(url, "?filter=mentioned"):
+                strcat(url, "?filter=mentioned");
+        } else if (opts->filter == GH_ISSUE_FILTER_SUBSCRIBED) {
+            first_param_set ? strcat(url, "?filter=subscribed"):
+                strcat(url, "?filter=subscribed");
+        } else if (opts->filter == GH_ISSUE_FILTER_REPOS) {
+            first_param_set ? strcat(url, "?filter=repos"):
+                strcat(url, "?filter=repos");
+        }
+
+        if (opts->filter == GH_ISSUE_FILTER_ALL) {
+            first_param_set ? strcat(url, "&filter=all"):
+                strcat(url, "?filter=all");
+        }
+
+        if (opts->order == GH_ORDER_ASC) {
+            first_param_set ? strcat(url, "&direction=asc"):
+                strcat(url, "?direction=asc");
+        }
+    }
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issues_by_repo_list(const char *owner, const char *repo,
+                              const gh_client_issues_req_opts_t *opts)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/issues");
+    }
+
+    if (opts != NULL) {
+        int first_param_set = 0;
+
+        if (opts->assignee != NULL) {
+            first_param_set ? strcat(url, "&assignee="),
+                strcat(url, opts->assignee):
+                strcat(url, "?assignee="), strcat(url, opts->assignee);           
+        }
+        if (opts->creator != NULL) {
+            first_param_set ? strcat(url, "&creator="),
+                strcat(url, opts->creator):
+                strcat(url, "?creator="), strcat(url, opts->creator);           
+        }
+        if (opts->mention != NULL) {
+            first_param_set ? strcat(url, "&mention="),
+                strcat(url, opts->mention):
+                strcat(url, "?mention="), strcat(url, opts->mention);           
+        }
+        if (opts->labels != NULL) {
+            first_param_set ? strcat(url, "&labels="),
+                strcat(url, opts->labels):
+                strcat(url, "?labels="), strcat(url, opts->labels);           
         }
         if (opts->since != NULL) {
             first_param_set ? strcat(url, "&since="), strcat(url, opts->since):

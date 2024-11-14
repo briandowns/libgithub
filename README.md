@@ -69,6 +69,7 @@ List calls support pagination.
 ### Issues
 
 * List issues assigned to logged in user
+* List issues by repository
 
 ### Users
 

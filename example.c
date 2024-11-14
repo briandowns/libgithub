@@ -275,6 +275,19 @@ main(int argc, char **argv)
     printf("%lu\n", res->resp_code);
     gh_client_response_free(res);
 
+    gh_client_issues_req_opts_t iro = {
+        .state = GH_ITEM_STATE_OPENED,
+        .order = GH_ORDER_DESC
+    };
+    res = gh_client_issues_for_user_list(&iro);
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    printf("%s\n", res->resp);
+    gh_client_response_free(res);
+
     gh_client_free();
     
     return 0;

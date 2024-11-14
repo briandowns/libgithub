@@ -7,6 +7,8 @@
 #define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
 #define GH_API_BASE_URL   "https://api.github.com"
+#define GH_API_ORGS_URL   GH_API_BASE_URL "/orgs"
+#define GH_API_ORG_URL    GH_API_BASE_URL "/org"
 #define GH_API_REPO_URL   GH_API_BASE_URL "/repos/"
 #define GH_API_USER_URL   GH_API_BASE_URL "/user"
 #define GH_API_USERS_URL  GH_API_BASE_URL "/users/"
@@ -103,6 +105,9 @@ typedef struct {
     enum gh_issue_filters filter;
     enum gh_issue_sort_options sort;
     unsigned int per_page;
+    char *assignee;
+    char *creator;
+    char *mention;
     char *labels;
     char *page_url;
     char *since; // expected format: YYYY-MM-DDTHH:MM:SSZ
@@ -388,18 +393,32 @@ gh_client_response_t*
 gh_client_user_block_by_id(const char *username);
 
 /**
- * Unblocks a user by the given id. The response memory needs to be freed
- * by the caller.
+ * Unblocks a user by the given id. The response memory needs to be freed by
+ * the caller.
  */
 gh_client_response_t*
 gh_client_user_unblock_by_id(const char *username);
 
 /**
- * List issues for the logged in user. The response memory needs to be freed
- * by the caller.
+ * List issues for the logged in user. The response memory needs to be freed by
+ * the caller.
  */
 gh_client_response_t*
 gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts);
+
+/**
+ * List issues for the given repository. The response memory needs to be freed
+ * by the caller.
+ */
+gh_client_response_t*
+gh_client_issues_by_repo_list(const char *owner, const char *repo,
+                              const gh_client_issues_req_opts_t *opts);
+
+/**
+ * Create an issue. The response memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_issue_create();
 
 /**
  * Free the memory used by the client.
