@@ -2,7 +2,6 @@
 
 [![Build and Deploy](https://github.com/briandowns/libgithub/actions/workflows/compile_example.yml/badge.svg)](https://github.com/briandowns/libgithub/actions/workflows/compile_example.yml/badge.svg)
 
-
 libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en).
 
 ## Usage
@@ -12,8 +11,6 @@ Initialize the library. The call requires the user's github token.
 ```c
 gh_client_init(token);
 ```
-
-Response data is returned in JSON format however the caller is responsible for how to handle the data.
 
 ## Build shared object
 
@@ -32,6 +29,8 @@ make example
 ```
 
 ## Features
+
+API response data is returned in a string containing JSON. The caller is responsible for how to handle the data.
 
 List calls support pagination.
 
