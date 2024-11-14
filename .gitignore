@@ -8,5 +8,9 @@ bin/*
 tests/tests
 example
 pagination
+issues
+prs
+comments
+branches
 libgithub.dylib
 libgithub.so

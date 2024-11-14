@@ -11,7 +11,7 @@
 #define GH_API_USER_URL   GH_API_BASE_URL "/user"
 #define GH_API_USERS_URL  GH_API_BASE_URL "/users/"
 #define GH_API_ISSUE_URL  GH_API_BASE_URL "/issue"
-#define GH_API_ISSUES_URL GH_API_BASE_URL "/issues/"
+#define GH_API_ISSUES_URL GH_API_BASE_URL "/issues"
 
 /**
  * Contains the rate limit information returned from each API call.
@@ -88,7 +88,7 @@ enum gh_issue_sort_options {
  * Structure used to pass additional options when listing pull requests.
  */
 typedef struct {
-    enum gh_item_list_order state;
+    enum gh_item_list_state state;
     enum gh_item_list_order order;
     unsigned int per_page;
     char *page_url;
@@ -98,7 +98,7 @@ typedef struct {
  * Structure used to pass additional options when listing issues.
  */
 typedef struct {
-    enum gh_item_list_order state;
+    enum gh_item_list_state state;
     enum gh_item_list_order order;
     enum gh_issue_filters filter;
     enum gh_issue_sort_options sort;

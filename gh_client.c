@@ -1361,24 +1361,24 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
                 strcat(url, "?state=all");
         }
 
-        if (opts->state == GH_ISSUE_FILTER_ALL) {
+        if (opts->filter == GH_ISSUE_FILTER_ALL) {
             first_param_set ? strcat(url, "&filter=all"):
                 strcat(url, "?filter=all");
-        } else if (opts->state == GH_ISSUE_FILTER_CREATED) {
+        } else if (opts->filter == GH_ISSUE_FILTER_CREATED) {
             first_param_set ? strcat(url, "?filter=created"):
                 strcat(url, "?filter=created");
-        } else if (opts->state == GH_ISSUE_FILTER_MENTIONED) {
+        } else if (opts->filter == GH_ISSUE_FILTER_MENTIONED) {
             first_param_set ? strcat(url, "?filter=mentioned"):
                 strcat(url, "?filter=mentioned");
-        } else if (opts->state == GH_ISSUE_FILTER_SUBSCRIBED) {
+        } else if (opts->filter == GH_ISSUE_FILTER_SUBSCRIBED) {
             first_param_set ? strcat(url, "?filter=subscribed"):
                 strcat(url, "?filter=subscribed");
-        } else if (opts->state == GH_ISSUE_FILTER_REPOS) {
+        } else if (opts->filter == GH_ISSUE_FILTER_REPOS) {
             first_param_set ? strcat(url, "?filter=repos"):
                 strcat(url, "?filter=repos");
         }
 
-        if (opts->state == GH_ISSUE_FILTER_ALL) {
+        if (opts->filter == GH_ISSUE_FILTER_ALL) {
             first_param_set ? strcat(url, "&filter=all"):
                 strcat(url, "?filter=all");
         }
