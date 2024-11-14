@@ -1,13 +1,17 @@
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
+#include <stdbool.h>
+
 #define GH_CLIENT_USER_BLOCKED_CODE     204
 #define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
-#define GH_API_BASE_URL  "https://api.github.com"
-#define GH_API_REPO_URL  GH_API_BASE_URL "/repos/"
-#define GH_API_USER_URL  GH_API_BASE_URL "/user"
-#define GH_API_USERS_URL GH_API_BASE_URL "/users/"
+#define GH_API_BASE_URL   "https://api.github.com"
+#define GH_API_REPO_URL   GH_API_BASE_URL "/repos/"
+#define GH_API_USER_URL   GH_API_BASE_URL "/user"
+#define GH_API_USERS_URL  GH_API_BASE_URL "/users/"
+#define GH_API_ISSUE_URL  GH_API_BASE_URL "/issue"
+#define GH_API_ISSUES_URL GH_API_BASE_URL "/issues/"
 
 /**
  * Contains the rate limit information returned from each API call.
@@ -42,31 +46,72 @@ typedef struct {
 } gh_client_response_t;
 
 /**
- * Contains the pull request states to choose from when listing.
+ * Contains the states to choose from when listing objects.
  */
-enum gh_pull_request_state {
-    GH_PR_STATE_OPENED = 0,
-    GH_PR_STATE_CLOSED = 1,
-    GH_PR_STATE_MERGED = 2
+enum gh_item_list_state {
+    GH_ITEM_STATE_OPENED = 0,
+    GH_ITEM_STATE_CLOSED = 1,
+    GH_ITEM_STATE_MERGED = 2,
+    GH_ITEM_STATE_ALL    = 3
 };
 
 /**
- * Contains the pull request order options when listing.
+ * Contains order options when listing objects.
  */
-enum gh_pull_request_order {
-    GH_PR_ORDER_DESC = 0,
-    GH_PR_ORDER_ASC  = 1
+enum gh_item_list_order {
+    GH_ORDER_DESC = 0,
+    GH_ORDER_ASC  = 1
+};
+
+/**
+ * gh_issue_filters
+ */
+enum gh_issue_filters {
+    GH_ISSUE_FILTER_ASSIGNED   = 0, // default
+    GH_ISSUE_FILTER_CREATED    = 1,
+    GH_ISSUE_FILTER_MENTIONED  = 2,
+    GH_ISSUE_FILTER_SUBSCRIBED = 3,
+    GH_ISSUE_FILTER_REPOS      = 4,
+    GH_ISSUE_FILTER_ALL        = 5
+};
+
+/**
+ * gh_issue_sort_options
+ */
+enum gh_issue_sort_options {
+    GH_ISSUE_SORT_CREATED  = 0, // default
+    GH_ISSUE_SORT_UPDATED  = 1,
+    GH_ISSUE_SORT_COMMENTS = 2
 };
 
 /**
  * Structure used to pass additional options when listing pull requests.
  */
 typedef struct {
-    enum gh_pull_request_state state;
-    enum gh_pull_request_order order;
+    enum gh_item_list_order state;
+    enum gh_item_list_order order;
     unsigned int per_page;
     char *page_url;
 } gh_client_pull_req_opts_t;
+
+/**
+ * Structure used to pass additional options when listing issues.
+ */
+typedef struct {
+    enum gh_item_list_order state;
+    enum gh_item_list_order order;
+    enum gh_issue_filters filter;
+    enum gh_issue_sort_options sort;
+    unsigned int per_page;
+    char *labels;
+    char *page_url;
+    char *since; // expected format: YYYY-MM-DDTHH:MM:SSZ
+    bool collab;
+    bool orgs;
+    bool owned;
+    bool pulls;
+    
+} gh_client_issues_req_opts_t;
 
 /**
  * Structure used to pass pagination settings.
@@ -80,8 +125,7 @@ typedef struct {
  * Structure used to pass pagination settings.
  */
 typedef struct {
-    unsigned int page;
-    unsigned int per_page;
+    char *page_url;
     unsigned int first;
     unsigned int last;
     char *after;
@@ -349,6 +393,13 @@ gh_client_user_block_by_id(const char *username);
  */
 gh_client_response_t*
 gh_client_user_unblock_by_id(const char *username);
+
+/**
+ * List issues for the logged in user. The response memory needs to be freed
+ * by the caller.
+ */
+gh_client_response_t*
+gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts);
 
 /**
  * Free the memory used by the client.

@@ -66,6 +66,10 @@ List calls support pagination.
 * Update a release
 * Delete a release
 
+### Issues
+
+* List issues assigned to logged in user
+
 ### Users
 
 * Get info for logged in user

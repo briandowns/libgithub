@@ -1013,16 +1013,16 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
     if (opts != NULL) {
         int first_param_set = 0;
 
-        if (opts->state == GH_PR_STATE_CLOSED) {
+        if (opts->state == GH_ITEM_STATE_CLOSED) {
             strcat(url, "?state=closed");
             first_param_set = 1;
-        } else if (opts->state == GH_PR_STATE_MERGED) {
+        } else if (opts->state == GH_ITEM_STATE_MERGED) {
             strcat(url, "?state=merged");
             first_param_set = 1;
         }
 
         // set the list order. api def is desc
-        if (opts->order == GH_PR_ORDER_ASC) {
+        if (opts->order == GH_ORDER_ASC) {
             first_param_set ? strcat(url, "&direction=asc"):
                 strcat(url, "?direction=asc");
         }
@@ -1069,9 +1069,9 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
 
     if (opts != NULL) {
         // set the list state. api def is open
-        if (opts->state == GH_PR_STATE_CLOSED) {
+        if (opts->state == GH_ITEM_STATE_CLOSED) {
             strcat(url, "?state=closed");
-        } else if (opts->state == GH_PR_STATE_MERGED) {
+        } else if (opts->state == GH_ITEM_STATE_MERGED) {
             strcat(url, "?state=merged");
         }
     }
@@ -1302,6 +1302,94 @@ gh_client_user_unblock_by_id(const char *username)
 
     SET_BASIC_CURL_CONFIG;
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE"); 
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(2048, sizeof(char));
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_ISSUES_URL);
+    }
+
+    if (opts != NULL) {
+        int first_param_set = 0;
+
+        if (opts->labels != NULL) {
+            first_param_set ? strcat(url, "&sha="), strcat(url, opts->labels):
+                strcat(url, "?sha="), strcat(url, opts->labels);           
+        }
+        if (opts->since != NULL) {
+            first_param_set ? strcat(url, "&since="), strcat(url, opts->since):
+                strcat(url, "?since="), strcat(url, opts->since);
+        }
+        if (opts->per_page > 30) {
+            char pp_val[11] = {0};
+            first_param_set ? strcat(url, "&per_page="),
+                sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
+                strcat(url, "?per_page="),
+                sprintf(pp_val, "%d", opts->per_page),
+                strcat(url, pp_val);
+        }
+        if (opts->state == GH_ITEM_STATE_CLOSED) {
+            first_param_set ? strcat(url, "&state=closed"):
+                strcat(url, "?state=closed");
+        } else if (opts->state == GH_ITEM_STATE_ALL) {
+            first_param_set ? strcat(url, "?state=all"):
+                strcat(url, "?state=all");
+        }
+
+        if (opts->state == GH_ISSUE_FILTER_ALL) {
+            first_param_set ? strcat(url, "&filter=all"):
+                strcat(url, "?filter=all");
+        } else if (opts->state == GH_ISSUE_FILTER_CREATED) {
+            first_param_set ? strcat(url, "?filter=created"):
+                strcat(url, "?filter=created");
+        } else if (opts->state == GH_ISSUE_FILTER_MENTIONED) {
+            first_param_set ? strcat(url, "?filter=mentioned"):
+                strcat(url, "?filter=mentioned");
+        } else if (opts->state == GH_ISSUE_FILTER_SUBSCRIBED) {
+            first_param_set ? strcat(url, "?filter=subscribed"):
+                strcat(url, "?filter=subscribed");
+        } else if (opts->state == GH_ISSUE_FILTER_REPOS) {
+            first_param_set ? strcat(url, "?filter=repos"):
+                strcat(url, "?filter=repos");
+        }
+
+        if (opts->state == GH_ISSUE_FILTER_ALL) {
+            first_param_set ? strcat(url, "&filter=all"):
+                strcat(url, "?filter=all");
+        }
+
+        if (opts->order == GH_ORDER_ASC) {
+            first_param_set ? strcat(url, "&direction=asc"):
+                strcat(url, "?direction=asc");
+        }
+    }
+
+    SET_BASIC_CURL_CONFIG;
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
