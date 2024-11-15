@@ -11,19 +11,30 @@ on:
     branches: [ master ]
 
 jobs:
-  run-example:
-    name: Example
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, freebsd-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         ref: master
-    - name: Force Pull
+    - name: Pull
       run: git pull origin master
     - name: Install Dependencies
-      run: sudo apt install -y make build-essential libcurl4 libcurl4-openssl-dev
+      run: |
+        if [ "${RUNNER_OS}" == "Linux" ]; then
+          sudo apt install -y make build-essential libcurl4 libcurl4-openssl-dev
+        elif [ "${RUNNER_OS}" == "macOS" ]; then
+          brew update
+          brew uninstall curl
+          brew install curl-openssl
+        fi
+    - name: Install Dependencies
+      run: 
     - name: Compile Library and Example
       run: |
         make && make example
