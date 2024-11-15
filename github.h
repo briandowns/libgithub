@@ -275,7 +275,7 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
                                  const char *data);
 
 /**
- * List the assets on a relase with the given. The response memory needs to be
+ * List the assets on a release with the given. The response memory needs to be
  * freed by the caller.
  */
 gh_client_response_t*
@@ -310,8 +310,6 @@ gh_client_repo_commit_get(const char *owner, const char *repo,
 /**
  * Compare 2 commits. The response memory needs to be
  * freed by the caller.
- * 
- * The format of hte 
  */
 gh_client_response_t*
 gh_client_repo_commits_compare(const char *owner, const char *repo,
@@ -421,7 +419,7 @@ gh_client_response_t*
 gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts);
 
 /**
- * Checks if the given username is blocked by the currenty logged in
+ * Checks if the given username is blocked by the currently logged in
  * user. If the response code is 204, the given user is blocked but 
  * if the response code is 404, the given user is not blocked. The
  * response memory needs to be freed by the caller.
