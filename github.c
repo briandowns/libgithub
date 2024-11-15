@@ -33,7 +33,7 @@
 
 #include <curl/curl.h>
 
-#include "gh_client.h"
+#include "github.h"
 
 #define GH_REQ_JSON_HEADER   "Accept: application/vnd.github+json"
 #define GH_REQ_VER_HEADER    "X-GitHub-Api-Version: 2022-11-28"

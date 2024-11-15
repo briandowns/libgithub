@@ -4,7 +4,7 @@
 
 #include <curl/curl.h>
 
-#include "gh_client.h"
+#include "github.h"
 
 
 int
