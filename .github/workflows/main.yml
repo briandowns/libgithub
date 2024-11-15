@@ -11,10 +11,10 @@ on:
     branches: [ master ]
 
 jobs:
-  build-linux-macos:
+  build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, freebsd-latest]
+        os: [ubuntu-latest, macos-latest, fedora-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout repo
@@ -33,33 +33,6 @@ jobs:
           brew uninstall curl
           brew install curl-openssl
         fi 
-    - name: Compile Library and Example
-      run: |
-        make && make example
-  build-freebsd:
-    runs-on: ubuntu-latest
-    name: A job to run test in FreeBSD
-    steps:
-    - uses: actions/checkout@v4
-    - name: Test in FreeBSD
-      id: test
-      uses: vmactions/freebsd-vm@v1
-      with:
-        usesh: true
-        prepare: |
-          pkg update && pkg upgrade
-          pkg install -y curl
-    - name: Checkout repo
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        ref: master
-    - name: Pull
-      run: git pull origin master
-    - name: Install Dependencies
-      run: |
-        pkg update && pkg upgrade
-        pkg install -y curl
     - name: Compile Library and Example
       run: |
         make && make example
