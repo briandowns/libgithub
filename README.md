@@ -54,12 +54,12 @@ List calls support pagination.
 
 - [x] List pull requests
 - [x] Get a pull request by id
-- [] Create a pull request
-- [] Update a pull request
-- [] List pull request files
-- [] Check if pull request has been merged
-- [] Merge a pull request
-- [] Update a pull request branch
+- [ ] Create a pull request
+- [ ] Update a pull request
+- [ ] List pull request files
+- [ ] Check if pull request has been merged
+- [ ] Merge a pull request
+- [ ] Update a pull request branch
 
 #### Release
 
@@ -76,9 +76,9 @@ List calls support pagination.
 
 - [x] List release assets
 - [x] Get a release asset
-- [] Update a release asset
-- [] Delete a release asset
-- [] Upload a release asset
+- [ ] Update a release asset
+- [ ] Delete a release asset
+- [ ] Upload a release asset
 
 ### Issues
 
@@ -105,7 +105,7 @@ Each response from the API includes rate limit data. This information is stored 
 
 To get specific information on rate limiting, the SDK supports these calls.
 
-- [] Get rate limit info
+- [ ] Get rate limit info
 
 ## Requirements / Dependencies
 
