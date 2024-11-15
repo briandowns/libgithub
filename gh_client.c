@@ -1,3 +1,30 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2024 Brian J. Downs
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 #define _DEFAULT_SOURCE
 #include <ctype.h>
 #include <stdio.h>
@@ -13,6 +40,7 @@
 #define GH_REQ_DEF_UA_HEADER "User-Agent: bd-gh-c-lib"
 
 #define TOKEN_HEADER_SIZE 256
+#define DEFAULT_URL_SIZE  2048
 
 #define SET_BASIC_CURL_CONFIG \
     curl_easy_setopt(curl, CURLOPT_URL, url); \
@@ -296,7 +324,7 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
 
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
@@ -344,7 +372,7 @@ gh_client_repo_releases_latest(const char *owner, const char *repo)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -378,7 +406,7 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -413,7 +441,7 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -451,7 +479,7 @@ gh_client_repo_release_create(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -487,7 +515,7 @@ gh_client_repo_release_update(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -527,7 +555,7 @@ gh_client_repo_release_delete(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -566,7 +594,7 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -602,7 +630,7 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
     } else {
@@ -680,7 +708,7 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
@@ -730,7 +758,7 @@ gh_client_repo_commit_get(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -766,7 +794,7 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -804,7 +832,7 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
@@ -851,7 +879,7 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -886,7 +914,7 @@ gh_client_repo_branch_rename(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -924,7 +952,7 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -962,7 +990,7 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -998,7 +1026,7 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
 
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
@@ -1056,7 +1084,7 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_REPO_URL);
     strcat(url, owner);
     strcat(url, "/");
@@ -1102,7 +1130,7 @@ gh_client_user_logged_in_get()
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_USER_URL);
 
     SET_BASIC_CURL_CONFIG;
@@ -1131,7 +1159,7 @@ gh_client_user_by_id_get(const char *username)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_USERS_URL);
     strcat(url, username);
 
@@ -1161,7 +1189,7 @@ gh_client_user_by_id_hovercard_get(const char *username)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_USERS_URL);
     strcat(url, username);
     strcat(url, "/hovercard");
@@ -1192,9 +1220,8 @@ gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     
-
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
     } else {
@@ -1235,7 +1262,7 @@ gh_client_user_blocked_by_id(const char *username)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_USER_URL "/blocks/");
     strcat(url, username);
 
@@ -1265,7 +1292,7 @@ gh_client_user_block_by_id(const char *username)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_USER_URL "/blocks/");
     strcat(url, username);
 
@@ -1296,7 +1323,7 @@ gh_client_user_unblock_by_id(const char *username)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     strcpy(url, GH_API_USER_URL "/blocks/");
     strcat(url, username);
 
@@ -1327,7 +1354,7 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
     } else {
@@ -1417,7 +1444,7 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = calloc(2048, sizeof(char));
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
     if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
     } else {
@@ -1505,6 +1532,200 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
     CURL_CALL_ERROR_CHECK;
 
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issue_create(const char *owner, const char *repo, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/issues");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issue_get(const char *owner, const char *repo,
+                    const int unsigned issue_id)
+{
+        gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/issues/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", issue_id);
+    strcat(url, id_val);
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issue_update(const char *owner, const char *repo,
+                       const int unsigned issue_id, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/issues/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", issue_id);
+    strcat(url, id_val);
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issue_lock(const char *owner, const char *repo,
+                     const int unsigned issue_id, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/issues/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", issue_id);
+    strcat(url, id_val);
+    strcat(url, "/lock");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_issue_unlock(const char *owner, const char *repo,
+                       const int unsigned issue_id)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/issues/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", issue_id);
+    strcat(url, id_val);
+    strcat(url, "/lock");
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
     CALL_CLEANUP;
 
     return response;

@@ -1,3 +1,30 @@
+/*-
+ * SPDX-License-Identifier: BSD-2-Clause
+ *
+ * Copyright (c) 2024 Brian J. Downs
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 #ifndef __CLIENT_H
 #define __CLIENT_H
 
@@ -374,7 +401,7 @@ gh_client_user_by_id_hovercard_get(const char *username);
  * The response memory needs to be freed by the caller.
  */
 gh_client_response_t*
-gh_client_user_blocked_list();
+gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts);
 
 /**
  * Checks if the given username is blocked by the currenty logged in
@@ -416,12 +443,67 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
 
 /**
  * Create an issue. The response memory needs to be freed by the caller.
+ *
+ * data argument must be JSON in the following format:
+ * 
+ * title (required)
+ * 
+ * {"title":"Found a bug","body":"I'\''m having a problem with this.",
+ *  "assignees":["octocat"],"milestone":1,"labels":["bug"]}
  */
 gh_client_response_t*
-gh_client_issue_create();
+gh_client_issue_create(const char *owner, const char *repo, const char *data);
 
 /**
- * Free the memory used by the client.
+ * Retrieve the issue based on the given id. The response memory needs to be 
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_issue_get(const char *owner, const char *repo,
+                    const int unsigned issue_id);
+
+/**
+ * Update the issue based on the given id. The response memory needs to be 
+ * freed by the caller.
+ * 
+ * data argument must be JSON in the following format:
+ * 
+ * {"title":"Found a bug","body":"I'\''m having a problem with this.",
+ *  "assignees":["octocat"],"milestone":1,"state":"open","labels":["bug"]}
+ */
+gh_client_response_t*
+gh_client_issue_update(const char *owner, const char *repo,
+                       const int unsigned issue_id, const char *data);
+
+/**
+ * Lock an issue. The response memory needs to be freed by the caller.
+ * 
+ * data argument must be JSON in the following format:
+ * 
+ * {"lock_reason":"off-topic"}
+ * 
+ * The API only returns a status code and not a body. A successful call will
+ * have a code of 204. Please reference the API docs for an exhaustive list
+ * of status codes.
+ */
+gh_client_response_t*
+gh_client_issue_lock(const char *owner, const char *repo,
+                     const int unsigned issue_id, const char *data);
+
+/**
+ * Unlock an issue. The response memory needs to be freed by the caller.
+ * 
+ * The API only returns a status code and not a body. A successful call will
+ * have a code of 204. Please reference the API docs for an exhaustive list
+ * of status codes.
+ */
+gh_client_response_t*
+gh_client_issue_unlock(const char *owner, const char *repo,
+                       const int unsigned issue_id);
+
+/**
+ * Free the memory used by the client. The response memory needs to be freed by
+ * the caller.
  */
 void
 gh_client_free();

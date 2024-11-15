@@ -37,48 +37,61 @@ List calls support pagination.
 ### Repositories
 #### Branches
 
-* List branches
-* Get a branch
-* Rename a branch
-* Sync to an upstream
-* Merge a branch
+- [x] List branches
+- [x] Get a branch
+- [x] Rename a branch
+- [x] Sync to an upstream
+- [x] Merge a branch
 
 #### Commits
 
-* List commits
-* Get a commit
-* Compare commits
-* Get PR from commit
+- [x] List commits
+- [x] Get a commit
+- [x] Compare commits
+- [x] Get PR from commit
 
 #### Pull Requests
 
-* List pull requests
-* Get a pull request by id
+- [x] List pull requests
+- [x] Get a pull request by id
 
 #### Release
 
-* List releases
-* Create a release
-* Generate release notes
-* Get latest
-* Get by tag
-* Get by id
-* Update a release
-* Delete a release
+- [x] List releases
+- [x] Create a release
+- [x] Generate release notes
+- [x] Get latest
+- [x] Get by tag
+- [x] Get by id
+- [x] Update a release
+- [x] Delete a release
+
+##### Assets
+
+- [] List release assets
+- [] Get a release asset
+- [] Update a release asset
+- [] Delete a release asset
+- [] Upload a release asset
 
 ### Issues
 
-* List issues assigned to logged in user
-* List issues by repository
+- [x] List issues assigned to logged in user
+- [x] List issues by repository
+- [x] Create an issue
+- [x] Get by id
+- [x] Update an issue
+- [x] Lock issue
+- [x] Unlock issue
 
 ### Users
 
-* Get info for logged in user
-* Get info for user by id
-* Get hovercard info
-* List blocked users
-* Block a user
-* Unblock a user
+- [x] Get info for logged in user
+- [x] Get info for user by id
+- [x] Get hovercard info
+- [x] List blocked users
+- [x] Block a user
+- [x] Unblock a user
 
 ### Rate Limit
 
@@ -86,7 +99,7 @@ Each response from the API includes rate limit data. This information is stored 
 
 ## Requirements / Dependencies
 
-* libcurl
+- [] libcurl
 
 ## Contributing
 
