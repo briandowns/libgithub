@@ -22,18 +22,18 @@ endif
 
 .PHONY: install
 install: 
-	cp gh_client.h $(INCDIR)
+	cp github.h $(INCDIR)
 ifeq ($(UNAME_S),Linux)
-	cp gh_client.h $(INCDIR)
+	cp github.h $(INCDIR)
 	cp $(NAME).so $(LIBDIR)
 endif
 ifeq ($(UNAME_S),Darwin)
-	cp gh_client.h $(INCDIR)
+	cp github.h $(INCDIR)
 	cp $(NAME).dylib $(LIBDIR)
 endif
 
 uninstall:
-	rm -f $(INCDIR)/gh_client.h
+	rm -f $(INCDIR)/github.h
 ifeq ($(UNAME_S),Linux)
 	rm -f $(INCDIR)/$(NAME).so
 endif
@@ -43,7 +43,7 @@ endif
 
 .PHONY: test
 test: clean
-	$(CC) -o tests/tests gh_client.c tests/tests.c tests/unity/unity.c $(LDFLAGS)
+	$(CC) -o tests/tests github.c tests/tests.c tests/unity/unity.c $(LDFLAGS)
 	tests/tests
 	rm -f tests/tests
 
@@ -56,4 +56,4 @@ clean:
 
 .PHONY: example
 example: clean
-	$(CC) -o $@ gh_client.c example.c $(CFLAGS) $(LDFLAGS)
+	$(CC) -o $@ github.c example.c $(CFLAGS) $(LDFLAGS)
