@@ -615,6 +615,98 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
+gh_client_repo_release_assets_list(const char *owner, const char *repo,
+                                   const unsigned int id,
+                                   const gh_client_req_list_opts_t *opts)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+
+    if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/releases/");
+
+        char id_val[11] = {0};
+        sprintf(id_val, "%d", id);
+        strcat(url, id_val);
+        strcat(url, "/assets");
+    }
+
+    if (opts != NULL && opts->per_page > 30) {
+        strcat(url, "?per_page=");
+
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
+    }
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_repo_release_asset_get(const char *owner, const char *repo,
+                                  const unsigned int id)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    char token_header[TOKEN_HEADER_SIZE];
+    strcpy(token_header, "Authorization: Bearer ");
+    strcat(token_header, token);
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_REPO_URL);
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/releases/assets/");
+
+    char id_val[11] = {0};
+    sprintf(id_val, "%d", id);
+    strcat(url, id_val);
+
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response; 
+}
+
+gh_client_response_t*
 gh_client_repo_commits_list(const char *owner, const char *repo,
                             const gh_client_commits_list_opts_t *opts)
 {
@@ -1574,7 +1666,7 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data)
 
 gh_client_response_t*
 gh_client_issue_get(const char *owner, const char *repo,
-                    const int unsigned issue_id)
+                    const int unsigned id)
 {
         gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1596,7 +1688,7 @@ gh_client_issue_get(const char *owner, const char *repo,
     strcat(url, "/issues/");
 
     char id_val[11] = {0};
-    sprintf(id_val, "%d", issue_id);
+    sprintf(id_val, "%d", id);
     strcat(url, id_val);
 
     SET_BASIC_CURL_CONFIG;
@@ -1612,7 +1704,7 @@ gh_client_issue_get(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_update(const char *owner, const char *repo,
-                       const int unsigned issue_id, const char *data)
+                       const int unsigned id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1634,7 +1726,7 @@ gh_client_issue_update(const char *owner, const char *repo,
     strcat(url, "/issues/");
 
     char id_val[11] = {0};
-    sprintf(id_val, "%d", issue_id);
+    sprintf(id_val, "%d", id);
     strcat(url, id_val);
 
     SET_BASIC_CURL_CONFIG;
@@ -1652,7 +1744,7 @@ gh_client_issue_update(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
-                     const int unsigned issue_id, const char *data)
+                     const int unsigned id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1674,7 +1766,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
     strcat(url, "/issues/");
 
     char id_val[11] = {0};
-    sprintf(id_val, "%d", issue_id);
+    sprintf(id_val, "%d", id);
     strcat(url, id_val);
     strcat(url, "/lock");
 
@@ -1693,7 +1785,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_unlock(const char *owner, const char *repo,
-                       const int unsigned issue_id)
+                       const int unsigned id)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1715,7 +1807,7 @@ gh_client_issue_unlock(const char *owner, const char *repo,
     strcat(url, "/issues/");
 
     char id_val[11] = {0};
-    sprintf(id_val, "%d", issue_id);
+    sprintf(id_val, "%d", id);
     strcat(url, id_val);
     strcat(url, "/lock");
 

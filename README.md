@@ -68,11 +68,11 @@ List calls support pagination.
 
 ##### Assets
 
-- [ ] List release assets
-- [ ] Get a release asset
-- [ ] Update a release asset
-- [ ] Delete a release asset
-- [ ] Upload a release asset
+- [x] List release assets
+- [x] Get a release asset
+- [] Update a release asset
+- [] Delete a release asset
+- [] Upload a release asset
 
 ### Issues
 

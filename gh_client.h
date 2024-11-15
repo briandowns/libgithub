@@ -275,6 +275,23 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
                                  const char *data);
 
 /**
+ * List the assets on a relase with the given. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_release_assets_list(const char *owner, const char *repo,
+                                   const unsigned int id,
+                                   const gh_client_req_list_opts_t *opts);
+
+/**
+ * Retrieve a release asset for th given id. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_release_asset_get(const char *owner, const char *repo,
+                                  const unsigned int id);
+
+/**
  * Retrieve commits for a given repository. The response memory needs to be
  * freed by the caller.
  */
@@ -460,7 +477,7 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data);
  */
 gh_client_response_t*
 gh_client_issue_get(const char *owner, const char *repo,
-                    const int unsigned issue_id);
+                    const int unsigned id);
 
 /**
  * Update the issue based on the given id. The response memory needs to be 
@@ -473,7 +490,7 @@ gh_client_issue_get(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_update(const char *owner, const char *repo,
-                       const int unsigned issue_id, const char *data);
+                       const int unsigned id, const char *data);
 
 /**
  * Lock an issue. The response memory needs to be freed by the caller.
@@ -488,7 +505,7 @@ gh_client_issue_update(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
-                     const int unsigned issue_id, const char *data);
+                     const int unsigned id, const char *data);
 
 /**
  * Unlock an issue. The response memory needs to be freed by the caller.
@@ -499,7 +516,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_unlock(const char *owner, const char *repo,
-                       const int unsigned issue_id);
+                       const int unsigned id);
 
 /**
  * Free the memory used by the client. The response memory needs to be freed by
