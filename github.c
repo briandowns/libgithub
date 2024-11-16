@@ -37,9 +37,13 @@
 
 #define GH_REQ_JSON_HEADER   "Accept: application/vnd.github+json"
 #define GH_REQ_VER_HEADER    "X-GitHub-Api-Version: 2022-11-28"
+
+// the GitHub API requires a user agent to be set so we 
+// check if one is set and set one if not.
 #ifndef GH_REQ_DEF_UA_HEADER
 #define GH_REQ_DEF_UA_HEADER "User-Agent: bd-gh-c-lib"
 #endif
+
 #define TOKEN_HEADER_SIZE 256
 #define DEFAULT_URL_SIZE  2048
 

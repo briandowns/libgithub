@@ -1,15 +1,14 @@
 cc = cc
 
-CFLAGS  = -g -std=c99 -O3 -Wall -fPIC
-LDFLAGS = -lcurl 
-
-NAME    = libgithub
+NAME = libgithub
 
 UNAME_S = $(shell uname -s)
 
+CFLAGS  = -std=c99 -O3 -Wall -fPIC
 ifeq ($(UNAME_S),FreeBSD)
 	CFLAGS += $(shell pkg-config --cflags --libs libcurl)
 endif
+LDFLAGS = -lcurl
 
 # respect traditional UNIX paths
 INCDIR  = /usr/local/include

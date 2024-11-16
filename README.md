@@ -2,7 +2,7 @@
 
 [![Build and Deploy](https://github.com/briandowns/libgithub/actions/workflows/main.yml/badge.svg)](https://github.com/briandowns/libgithub/actions/workflows/compile_example.yml/badge.svg)
 
-libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en).
+libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en). libgithub has been tested on Linux (Debian variants), MacOS, and FreeBSD.
 
 ## Usage
 
