@@ -103,6 +103,7 @@ gh_client_response_free(gh_client_response_t *res)
         }
 
         free(res);
+        res = NULL;
     }
 }
 

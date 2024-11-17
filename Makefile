@@ -23,6 +23,16 @@ $(NAME).so: clean
 	$(CC) -shared -o $@ $(CFLAGS) $(LDFLAGS)
 endif
 
+.PHONY: test
+test: clean
+	$(CC) -o tests/tests tests/github_test.c github.c $(CFLAGS) $(LDFLAGS)
+	tests/tests
+	rm -f tests/tests
+
+.PHONY: valgrind
+valgrind: example
+	valgrind ./example
+
 .PHONY: install
 install: 
 	cp github.h $(INCDIR)
@@ -43,12 +53,6 @@ endif
 ifeq ($(UNAME_S),Darwin)
 	rm -f $(INCDIR)/$(NAME).dylib
 endif
-
-.PHONY: test
-test: clean
-	$(CC) -o tests/tests github.c tests/tests.c tests/unity/unity.c $(LDFLAGS)
-	tests/tests
-	rm -f tests/tests
 
 .PHONY: clean
 clean:

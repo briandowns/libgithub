@@ -18,15 +18,15 @@ main(int argc, char **argv)
 
     gh_client_init(token);
 
-    // gh_client_response_t *res = gh_client_octocat_says();
-    // if (res->err_msg != NULL) {
-    //     printf("%s\n", res->err_msg);
-    //     gh_client_response_free(res);
-    //     return 1;
-    // }
-    // printf("%s\n", res->resp);
-    // printf("%ld\n", res->resp_code);
-    // gh_client_response_free(res);
+    gh_client_response_t *res = gh_client_octocat_says();
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    printf("%s\n", res->resp);
+    printf("%ld\n", res->resp_code);
+    gh_client_response_free(res);
 
     // res = gh_client_repo_releases_list("rancher", "rke2", NULL);
     // if (res->err_msg != NULL) {
@@ -150,14 +150,14 @@ main(int argc, char **argv)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_repo_release_assets_list("rancher", "rke2", 182819936, NULL);
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    gh_client_response_free(res);
+    // gh_client_response_t *res = gh_client_repo_release_assets_list("rancher", "rke2", 182819936, NULL);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
 
     // gh_client_response_t *res = gh_client_repo_release_asset_get("rancher", "rke2", 182819936);
     // if (res->err_msg != NULL) {
