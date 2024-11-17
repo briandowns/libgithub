@@ -29,6 +29,7 @@
 #define __CLIENT_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define GH_CLIENT_USER_BLOCKED_CODE     204
 #define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
