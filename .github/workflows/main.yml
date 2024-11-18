@@ -35,7 +35,10 @@ jobs:
           brew update
           brew uninstall curl
           brew install curl-openssl
-        fi 
-    - name: Compile Library and Example
-      run: |
-        make && make example
+        fi
+    - name: Compile Shared Object
+      run: make
+    - name: Run tests
+      run: make test
+    - name: Run Examples
+      run: make example
