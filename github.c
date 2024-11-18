@@ -71,7 +71,7 @@ static CURL *curl = NULL;
 static char *token = NULL;
 
 int
-gh_client_init(const char *tkn)
+gh_client_init(const char *token)
 {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
@@ -79,7 +79,7 @@ gh_client_init(const char *tkn)
         return 1;
     }
 
-    token = (char *)tkn;
+    token = (char *)token;
 
     return 0;
 }

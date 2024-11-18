@@ -49,7 +49,8 @@ test_gh_client_response_free()
 void
 test_gh_client_call_unauthorized()
 {
-    gh_client_response_t *res = gh_client_repo_releases_list("briandowns", "spinner", NULL);
+    gh_client_response_t *res = gh_client_repo_releases_list("briandowns", 
+                                                             "spinner", NULL);
     assert(res != NULL);
     assert(res->resp != NULL);
     assert(res->err_msg == NULL);
