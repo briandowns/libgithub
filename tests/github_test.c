@@ -62,7 +62,13 @@ test_gh_client_call_unauthorized()
 int
 main(int argc, char **argv)
 {
-    gh_client_init("");
+    char *token = getenv("GITHUB_TOKEN");
+    if (token == NULL) {
+        fprintf(stderr, "github token not set in environment\n");
+        return 1;
+    }
+
+    gh_client_init(token);
     
     test_gh_client_octocat_says();
     test_gh_client_response_free();
