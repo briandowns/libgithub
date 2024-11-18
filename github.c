@@ -901,7 +901,7 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
     strcat(url, "/");
     strcat(url, base);
     strcat(url, "...");
-    strcat(url, base);
+    strcat(url, head);
 
     SET_BASIC_CURL_CONFIG;
 

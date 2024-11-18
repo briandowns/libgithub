@@ -2,11 +2,11 @@
 
 [![Build and Deploy](https://github.com/briandowns/libgithub/actions/workflows/main.yml/badge.svg)](https://github.com/briandowns/libgithub/actions/workflows/compile_example.yml/badge.svg)
 
-libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en). libgithub has been tested on Linux (Debian variants), MacOS, and FreeBSD.
+libgithub is a C client library for accessing the [Github REST API](https://docs.github.com/en) and has been tested on Linux (Debian variants), MacOS, and FreeBSD with GCC and Clang.
 
 ## Usage
 
-Initialize the library. The call requires the user's github token.
+To initialize the library, the user's github token is required.
 
 ```c
 gh_client_init(token);

@@ -4,7 +4,7 @@ NAME = libgithub
 
 UNAME_S = $(shell uname -s)
 
-CFLAGS  = -std=c99 -O3 -Wall -fPIC
+CFLAGS  = -std=c99 -O3 -fPIC -Wall -Wextra
 ifeq ($(UNAME_S),FreeBSD)
 	CFLAGS += $(shell pkg-config --cflags --libs libcurl)
 endif
