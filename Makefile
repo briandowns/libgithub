@@ -25,7 +25,7 @@ endif
 
 .PHONY: test
 test: clean
-	$(CC) -o tests/tests tests/github_test.c github.c $(CFLAGS) $(LDFLAGS)
+	$(CC) -o tests/tests tests/unity.c tests/github_test.c github.c $(CFLAGS) $(LDFLAGS)
 	tests/tests
 	rm -f tests/tests
 

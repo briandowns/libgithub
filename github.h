@@ -187,15 +187,20 @@ int
 gh_client_init(const char *token);
 
 /**
+ * Set the value to be used as the user agent in requests.
+ */
+void
+gh_client_set_user_agent(const char *ua);
+
+/**
  * Free the memory used in the client response.
  */
 void
 gh_client_response_free(gh_client_response_t *res);
 
 /**
- * Retrieve an octocat response giving
- * an interesitng saying. The response memory
- * needs to be freed by the caller.
+ * Retrieve an octocat response giving an interesitng saying. The response
+ * memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_octocat_says();
@@ -232,8 +237,8 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
                              const unsigned int id);
 
 /**
- * Create a new release for the given repository and configuration.
- * The response memory needs to be freed by the caller.
+ * Create a new release for the given repository and configuration. The
+ * response memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_repo_release_create(const char *owner, const char *repo,
@@ -301,16 +306,15 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
                             const gh_client_commits_list_opts_t *opts);
 
 /**
- * Retrieve a single commit. The response memory needs to be
- * freed by the caller.
+ * Retrieve a single commit. The response memory needs to be freed by the
+ * caller.
  */
 gh_client_response_t*
 gh_client_repo_commit_get(const char *owner, const char *repo,
                           const char *sha);
 
 /**
- * Compare 2 commits. The response memory needs to be
- * freed by the caller.
+ * Compare 2 commits. The response memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_repo_commits_compare(const char *owner, const char *repo,
@@ -326,8 +330,8 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
                                const gh_client_req_list_opts_t *opts);
 
 /**
- * Retrieve a list of branches for the given repository
- * in JSON format. The response memory needs to be freed by the caller. 
+ * Retrieve a list of branches for the given repository in JSON format. The
+ * response memory needs to be freed by the caller. 
  */
 gh_client_response_t*
 gh_client_repo_branches_list(const char *owner, const char *repo,
@@ -343,7 +347,7 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
 
 /**
  * Rename the given branch. The response memory needs to be freed by the
- * caller. 
+ * caller.
  * 
  * data argument must be JSON in the following format:
  * '{"new_name":"my_renamed_branch"}'
@@ -375,16 +379,16 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
                             const char *data);
 
 /**
- * Retrieve a list of open pull requests. The response memory
- * needs to be freed by the caller.
+ * Retrieve a list of open pull requests. The response memory needs to be freed
+ * by the caller.
  */
 gh_client_response_t*
 gh_client_repo_pull_request_list(const char *owner, const char *repo,
                                  const gh_client_pull_req_opts_t *opts);
 
 /**
- * Retrieve 1 pull request by id. order option in opts will be
- * ignored. The response memory needs to be freed by the caller. 
+ * Retrieve 1 pull request by id. order option in opts will be ignored. The
+ * response memory needs to be freed by the caller. 
  */
 gh_client_response_t*
 gh_client_repo_pull_request_get(const char *owner, const char *repo,
@@ -392,45 +396,45 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
                                 const gh_client_pull_req_opts_t *opts);
 
 /**
- * Retrieve account information for the user currently logged in. 
- * The response memory needs to be freed by the caller.
+ * Retrieve account information for the user currently logged in. The response
+ * memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_user_logged_in_get();
 
 /**
- * Retrieve account information for the given username. The response
- * memory needs to be freed by the caller.
+ * Retrieve account information for the given username. The response memory
+ * needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_user_by_id_get(const char *username);
 
 /**
- * Retrieve hovercard for the given username. The response memory
- * needs to be freed by the caller.
+ * Retrieve hovercard for the given username. The response memory needs to be
+ * freed by the caller.
  */
 gh_client_response_t*
 gh_client_user_by_id_hovercard_get(const char *username);
 
 /**
- * Retrieve a list of blocked users for the currently logged in user.
- * The response memory needs to be freed by the caller.
+ * Retrieve a list of blocked users for the currently logged in user. The
+ * response memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts);
 
 /**
- * Checks if the given username is blocked by the currently logged in
- * user. If the response code is 204, the given user is blocked but 
- * if the response code is 404, the given user is not blocked. The
- * response memory needs to be freed by the caller.
+ * Checks if the given username is blocked by the currently logged in user. If
+ * the response code is 204, the given user is blocked but if the response code
+ * is 404, the given user is not blocked. The response memory needs to be freed
+ * by the caller.
  */
 gh_client_response_t*
 gh_client_user_blocked_by_id(const char *username);
 
 /**
- * Blocks a user by the given id. The response memory needs to be freed
- * by the caller.
+ * Blocks a user by the given id. The response memory needs to be freed by the
+ * caller.
  */
 gh_client_response_t*
 gh_client_user_block_by_id(const char *username);
@@ -471,7 +475,7 @@ gh_client_response_t*
 gh_client_issue_create(const char *owner, const char *repo, const char *data);
 
 /**
- * Retrieve the issue based on the given id. The response memory needs to be 
+ * Retrieve the issue based on the given id. The response memory needs to be
  * freed by the caller.
  */
 gh_client_response_t*
@@ -479,7 +483,7 @@ gh_client_issue_get(const char *owner, const char *repo,
                     const int unsigned id);
 
 /**
- * Update the issue based on the given id. The response memory needs to be 
+ * Update the issue based on the given id. The response memory needs to be
  * freed by the caller.
  * 
  * data argument must be JSON in the following format:
@@ -499,8 +503,8 @@ gh_client_issue_update(const char *owner, const char *repo,
  * {"lock_reason":"off-topic"}
  * 
  * The API only returns a status code and not a body. A successful call will
- * have a code of 204. Please reference the API docs for an exhaustive list
- * of status codes.
+ * have a code of 204. Please reference the API docs for an exhaustive list of
+ * status codes.
  */
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
@@ -510,8 +514,8 @@ gh_client_issue_lock(const char *owner, const char *repo,
  * Unlock an issue. The response memory needs to be freed by the caller.
  * 
  * The API only returns a status code and not a body. A successful call will
- * have a code of 204. Please reference the API docs for an exhaustive list
- * of status codes.
+ * have a code of 204. Please reference the API docs for an exhaustive list of
+ * status codes.
  */
 gh_client_response_t*
 gh_client_issue_unlock(const char *owner, const char *repo,

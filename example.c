@@ -8,14 +8,14 @@
 
 
 int
-main(int argc, char **argv)
+main(void)
 {
     char *token = getenv("GITHUB_TOKEN");
-    if (token == NULL) {
-        fprintf(stderr, "github token not set in environment\n");
+    if (token == NULL || token[0] == '\0') {
+        fprintf(stderr, "github token not set in environment or invalid\n");
         return 1;
     }
-
+    printf("%s\n", token);
     gh_client_init(token);
 
     gh_client_response_t *res = gh_client_octocat_says();

@@ -25,58 +25,195 @@
  * SUCH DAMAGE.
  */
 
-#include <assert.h>
 #include <stdio.h>
 
+#include "unity.h"
 #include "../github.h"
 
 void
-test_gh_client_octocat_says()
+setUp(void)
+{
+}
+
+void
+tearDown(void)
+{
+}
+
+void
+test_gh_client_set_user_agent(void)
+{
+    gh_client_set_user_agent("test_user_agent");
+}
+
+void
+test_gh_client_octocat_says(void)
 {
     gh_client_response_t *res = gh_client_octocat_says();
-    assert(res != NULL);
+
+    TEST_ASSERT_NOT_NULL(res);
+
     gh_client_response_free(res);
 }
 
 void
-test_gh_client_response_free()
+test_gh_client_res_rate_limit(void)
 {
     gh_client_response_t *res = gh_client_octocat_says();
-    assert(res != NULL);
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_NOT_NULL(res->rate_limit_data);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->limit);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->remaining);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->reset);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->used);
+
     gh_client_response_free(res);
 }
 
 void
-test_gh_client_call_unauthorized()
+test_gh_client_repo_releases_list_nonpaginated(void)
 {
-    gh_client_response_t *res = gh_client_repo_releases_list("briandowns", 
+    gh_client_response_t *res = gh_client_repo_releases_list("briandowns",
                                                              "spinner", NULL);
-    assert(res != NULL);
-    assert(res->resp != NULL);
-    assert(res->err_msg == NULL);
-    assert(res->err_code == 0);
-    assert(res->resp_code = 401);
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_NULL(res->next_link);
+
     gh_client_response_free(res);
 }
+
+void
+test_gh_client_repo_releases_list_paginated(void)
+{
+    gh_client_response_t *res = gh_client_repo_releases_list("rancher",
+                                                             "rke2", NULL);
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_NOT_NULL(res->next_link);
+
+    gh_client_response_free(res);
+}
+
+void
+test_gh_client_repo_releases_latest(void)
+{
+    gh_client_response_t *res = gh_client_repo_releases_latest("briandowns",
+                                                               "spinner");
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_EQUAL_INT(200, res->resp_code);
+
+    gh_client_response_free(res);
+}
+
+void
+test_gh_client_repo_release_by_id(void)
+{
+    gh_client_response_t *res = gh_client_repo_release_by_tag("briandowns",
+                                                              "spinner",
+                                                              "v1.23.1");
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_EQUAL_INT(200, res->resp_code);
+
+    printf("%s\n", res->resp);
+
+    gh_client_response_free(res);
+}
+
+void
+test_gh_client_repo_release_assets_list(void)
+{}
+
+void
+test_gh_client_repo_release_asset_get(void)
+{}
+
+void
+test_gh_client_repo_commits_list(void)
+{}
+
+void
+test_gh_client_repo_commits_compare(void)
+{}
+
+void
+test_gh_client_repo_pr_commits_list(void)
+{}
+
+void
+test_gh_client_repo_branches_list(void)
+{}
+
+void
+test_gh_client_repo_branch_get(void)
+{}
+
+void
+test_gh_client_repo_pull_request_list(void)
+{}
+
+void
+test_gh_client_repo_pull_request_get(void)
+{}
+
+void
+test_gh_client_user_logged_in_get(void)
+{}
+
+void
+test_gh_client_user_by_id_get(void)
+{}
+
+void
+test_gh_client_user_by_id_hovercard_get(void)
+{}
+
+void
+test_gh_client_user_blocked_list(void)
+{}
+
+void
+test_gh_client_user_blocked_by_id(void)
+{}
 
 int
-main(int argc, char **argv)
+main(void)
 {
     char *token = getenv("GITHUB_TOKEN");
-    if (token == NULL) {
-        fprintf(stderr, "github token not set in environment\n");
+    if (token == NULL || token[0] == '\0') {
+        fprintf(stderr, "github token not set in environment or invalid\n");
         return 1;
     }
 
     gh_client_init(token);
-    
-    test_gh_client_octocat_says();
-    test_gh_client_response_free();
-    test_gh_client_call_unauthorized();
+
+    UNITY_BEGIN();
+
+    RUN_TEST(test_gh_client_set_user_agent);
+    RUN_TEST(test_gh_client_octocat_says);
+    RUN_TEST(test_gh_client_res_rate_limit);
+    RUN_TEST(test_gh_client_repo_releases_list_nonpaginated);
+    RUN_TEST(test_gh_client_repo_releases_list_paginated);
+    RUN_TEST(test_gh_client_repo_releases_latest);
+    RUN_TEST(test_gh_client_repo_release_by_id);
+    RUN_TEST(test_gh_client_repo_release_assets_list);
+    RUN_TEST(test_gh_client_repo_release_asset_get);
+    RUN_TEST(test_gh_client_repo_commits_list);
+    RUN_TEST(test_gh_client_repo_commits_compare);
+    RUN_TEST(test_gh_client_repo_pr_commits_list);
+    RUN_TEST(test_gh_client_repo_branches_list);
+    RUN_TEST(test_gh_client_repo_branch_get);
+    RUN_TEST(test_gh_client_repo_pull_request_list);
+    RUN_TEST(test_gh_client_repo_pull_request_get);
+    RUN_TEST(test_gh_client_user_logged_in_get);
+    RUN_TEST(test_gh_client_user_by_id_get);
+    RUN_TEST(test_gh_client_user_by_id_hovercard_get);
+    RUN_TEST(test_gh_client_user_blocked_list);
+    RUN_TEST(test_gh_client_user_blocked_by_id);
 
     gh_client_free();
 
-    printf("All tests have passed!\n");
-
-    return 0;
+    return UNITY_END();
 }
