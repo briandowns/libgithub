@@ -68,9 +68,9 @@ typedef struct {
 
     // pagination fields
     char *first_link;
-	char *next_link;
+    char *next_link;
     char *prev_link;
-	char *last_link;
+    char *last_link;
 
     gh_client_rate_limit_data_t *rate_limit_data;
 } gh_client_response_t;
@@ -143,7 +143,6 @@ typedef struct {
     bool orgs;
     bool owned;
     bool pulls;
-    
 } gh_client_issues_req_opts_t;
 
 /**
