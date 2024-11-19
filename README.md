@@ -28,11 +28,11 @@ Build the example:
 make example
 ```
 
-## Features
+## API Coverage
 
-API response data is returned in a string containing JSON. The caller is responsible for how to handle the data.
-
-List calls support pagination.
+* API response data is returned in a string containing JSON.
+* The caller is responsible for how to handle the data.
+* List calls support pagination.
 
 ### Repositories
 #### Branches
