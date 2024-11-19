@@ -159,7 +159,7 @@ main(void)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    // gh_client_response_t *res = gh_client_repo_release_asset_get("rancher", "rke2", 182819936);
+    // gh_client_response_t *res = gh_client_repo_release_asset_get("rancher", "rke2", 203030920);
     // if (res->err_msg != NULL) {
     //     printf("%s\n", res->err_msg);
     //     gh_client_response_free(res);

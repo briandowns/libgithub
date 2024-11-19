@@ -122,15 +122,42 @@ test_gh_client_repo_release_by_id(void)
 
 void
 test_gh_client_repo_release_assets_list(void)
-{}
+{
+    gh_client_response_t *res = gh_client_repo_release_assets_list(
+        "rancher", "rke2", 182819936, NULL);
+
+    //printf("%s\n", res->resp);
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_EQUAL_INT(200, res->resp_code);
+
+    gh_client_response_free(res);
+}
 
 void
 test_gh_client_repo_release_asset_get(void)
-{}
+{
+    gh_client_response_t *res = gh_client_repo_release_asset_get("rancher",
+                                                                 "rke2",
+                                                                 203030920);
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_EQUAL_INT(200, res->resp_code);
+
+    gh_client_response_free(res);
+}
 
 void
 test_gh_client_repo_commits_list(void)
-{}
+{
+    gh_client_response_t *res = gh_client_repo_commits_list("briandowns", 
+                                                            "devops-testing",
+                                                            NULL);
+
+    TEST_ASSERT_NOT_NULL(res);
+    TEST_ASSERT_EQUAL_INT(200, res->resp_code);
+
+    gh_client_response_free(res);
+}
 
 void
 test_gh_client_repo_commits_compare(void)
