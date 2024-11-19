@@ -39,7 +39,7 @@ jobs:
     - name: Compile Shared Object
       run: make
     - name: Run tests
-      run: make test
+      run: make tests
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Run Examples

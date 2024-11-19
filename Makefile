@@ -23,8 +23,8 @@ $(NAME).so: clean
 	$(CC) -shared -o $@ $(CFLAGS) $(LDFLAGS)
 endif
 
-.PHONY: test
-test: clean
+.PHONY: tests
+tests: clean
 	$(CC) -o tests/tests tests/unity.c tests/github_test.c github.c $(CFLAGS) $(LDFLAGS)
 	tests/tests
 	rm -f tests/tests
