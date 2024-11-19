@@ -117,8 +117,6 @@ test_gh_client_repo_release_by_id(void)
     TEST_ASSERT_NOT_NULL(res);
     TEST_ASSERT_EQUAL_INT(200, res->resp_code);
 
-    printf("%s\n", res->resp);
-
     gh_client_response_free(res);
 }
 

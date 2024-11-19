@@ -11,7 +11,7 @@
 #define UNITY_PROGMEM
 #endif
 
-/* If omitted from header, declare overrideable prototypes here so they're ready for use */
+/* If omitted from header, declare overridable prototypes here so they're ready for use */
 #ifdef UNITY_OMIT_OUTPUT_CHAR_HEADER_DECLARATION
 void UNITY_OUTPUT_CHAR(int);
 #endif
@@ -1116,7 +1116,7 @@ void UnityAssertFloatSpecial(const UNITY_FLOAT actual,
             is_trait = !UNITY_IS_INF(actual) && !UNITY_IS_NAN(actual);
             break;
 
-        case UNITY_FLOAT_INVALID_TRAIT:  /* Supress warning */
+        case UNITY_FLOAT_INVALID_TRAIT:  /* Suppress warning */
         default: /* including UNITY_FLOAT_INVALID_TRAIT */
             trait_index = 0;
             trait_names[0] = UnityStrInvalidFloatTrait;
@@ -1343,7 +1343,7 @@ void UnityAssertDoubleSpecial(const UNITY_DOUBLE actual,
             is_trait = !UNITY_IS_INF(actual) && !UNITY_IS_NAN(actual);
             break;
 
-        case UNITY_FLOAT_INVALID_TRAIT:  /* Supress warning */
+        case UNITY_FLOAT_INVALID_TRAIT:  /* Suppress warning */
         default: /* including UNITY_FLOAT_INVALID_TRAIT */
             trait_index = 0;
             trait_names[0] = UnityStrInvalidFloatTrait;
