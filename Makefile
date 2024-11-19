@@ -16,11 +16,11 @@ LIBDIR  = /usr/local/lib
 
 ifeq ($(UNAME_S),Darwin)
 $(NAME).dylib: clean
-	$(CC) -c -dynamiclib -o $@ $(CFLAGS) $(LDFLAGS)
+	$(CC) -dynamiclib -o $@ github.c $(CFLAGS) $(LDFLAGS)
 endif
 ifeq ($(UNAME_S),Linux)
 $(NAME).so: clean
-	$(CC) -shared -o $@ $(CFLAGS) $(LDFLAGS)
+	$(CC) -shared -o $@ github.c $(CFLAGS) $(LDFLAGS)
 endif
 
 .PHONY: tests
