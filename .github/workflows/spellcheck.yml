@@ -1,4 +1,4 @@
-name: Codespell
+name: Spellcheck
 on:
   push:  
   pull_request:
