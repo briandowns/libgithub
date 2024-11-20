@@ -33,6 +33,7 @@ make example
 * API response data is returned in a string containing JSON.
 * The caller is responsible for how to handle the data.
 * List calls support pagination.
+* Each response from the API includes rate limit data.
 
 ### Repositories
 #### Branches
@@ -99,6 +100,7 @@ make example
 - [x] Block a user
 - [x] Unblock a user
 - [x] List followers
+- [x] Get rate limit info for auth'd user
 
 ### Billing
 
@@ -108,14 +110,6 @@ make example
 
 - [x] Get all codes of conduct
 - [x] Get a code of conduct by key
-
-### Rate Limit
-
-Each response from the API includes rate limit data. This information is stored in the `rate_limit_data` field on the response struct.
-
-To get specific information on rate limiting, the SDK supports these calls.
-
-- [ ] Get rate limit info
 
 ## Requirements / Dependencies
 

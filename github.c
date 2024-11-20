@@ -1366,6 +1366,31 @@ gh_client_user_followers_list(const gh_client_req_list_opts_t *opts)
 }
 
 gh_client_response_t*
+gh_client_user_rate_limit_info()
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
+    strcpy(url, GH_API_BASE_URL "/rate_limit");
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    CALL_CLEANUP;
+
+    return response;
+}
+
+gh_client_response_t*
 gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
@@ -1795,8 +1820,7 @@ gh_client_code_of_conduct_get_by_key(const char *key)
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
     char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
-    strcpy(url, GH_API_BASE_URL);
-    strcat(url, "/codes_of_conduct/");
+    strcpy(url, GH_API_BASE_URL "/codes_of_conduct/");
     strcat(url, key);
 
     SET_BASIC_CURL_CONFIG;

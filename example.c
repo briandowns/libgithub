@@ -390,7 +390,16 @@ main(void)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_code_of_conduct_get_by_key("citizen_code_of_conduct"); 
+    // gh_client_response_t *res = gh_client_code_of_conduct_get_by_key("citizen_code_of_conduct"); 
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_user_rate_limit_info(); 
     if (res->err_msg != NULL) {
         printf("%s\n", res->err_msg);
         gh_client_response_free(res);

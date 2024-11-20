@@ -453,6 +453,13 @@ gh_client_response_t*
 gh_client_user_followers_list(const gh_client_req_list_opts_t *opts);
 
 /**
+ * Retrieve rate limit information for the authenticated user. The response
+ * memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_user_rate_limit_info();
+
+/**
  * List issues for the logged in user. The response memory needs to be freed by
  * the caller.
  */
