@@ -15,18 +15,17 @@ main(void)
         fprintf(stderr, "github token not set in environment or invalid\n");
         return 1;
     }
-    printf("%s\n", token);
     gh_client_init(token);
 
-    gh_client_response_t *res = gh_client_octocat_says();
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    printf("%ld\n", res->resp_code);
-    gh_client_response_free(res);
+    // gh_client_response_t *res = gh_client_octocat_says();
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // printf("%ld\n", res->resp_code);
+    // gh_client_response_free(res);
 
     // res = gh_client_repo_releases_list("rancher", "rke2", NULL);
     // if (res->err_msg != NULL) {
@@ -230,7 +229,7 @@ main(void)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    // res = gh_client_user_logged_in_get(); 
+    // gh_client_response_t *res = gh_client_user_logged_in_get(); 
     // if (res->err_msg != NULL) {
     //     printf("%s\n", res->err_msg);
     //     gh_client_response_free(res);
@@ -293,6 +292,15 @@ main(void)
     // printf("%lu\n", res->resp_code);
     // gh_client_response_free(res);
 
+    // gh_client_response_t *res = gh_client_user_followers_list(NULL); 
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
     // gh_client_issues_req_opts_t iro = {
     //     .state = GH_ITEM_STATE_OPENED,
     //     .order = GH_ORDER_DESC
@@ -307,7 +315,8 @@ main(void)
     // gh_client_response_free(res);
 
     // const char *data = "{\"title\": \"Testing from libgithub 2\", 
-    // \"body\": \"Adding a body to the issue.\", \"assignees\":[\"briandowns\"]}";
+    //                      \"body\": \"Adding a body to the issue.\",
+    //                      \"assignees\":[\"briandowns\"]}";
     // gh_client_response_t *res = gh_client_issue_create("briandowns",
     //                                                    "devops-testing",
     //                                                    data);
@@ -362,6 +371,33 @@ main(void)
     // }
     // printf("%ld\n", res->resp_code);
     // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_actions_billing_by_org("rancher"); 
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    // gh_client_response_t *res = gh_client_codes_of_conduct_list(); 
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
+
+    gh_client_response_t *res = gh_client_code_of_conduct_get_by_key("citizen_code_of_conduct"); 
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    printf("%s\n", res->resp);
+    gh_client_response_free(res);
 
     gh_client_free();
     

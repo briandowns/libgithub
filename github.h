@@ -446,6 +446,13 @@ gh_client_response_t*
 gh_client_user_unblock_by_id(const char *username);
 
 /**
+ * Retrieve the list of followers for the logged in user. The response memory
+ * needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_user_followers_list(const gh_client_req_list_opts_t *opts);
+
+/**
  * List issues for the logged in user. The response memory needs to be freed by
  * the caller.
  */
@@ -521,8 +528,28 @@ gh_client_issue_unlock(const char *owner, const char *repo,
                        const int unsigned id);
 
 /**
- * Free the memory used by the client. The response memory needs to be freed by
- * the caller.
+ * Retrieve the action billing information for the given organization. The
+ * response memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_actions_billing_by_org(const char *org);
+
+/**
+ * Retrieve all codes of conduct. The response memory needs to be freed by the
+ * caller.
+ */
+gh_client_response_t*
+gh_client_codes_of_conduct_list();
+
+/**
+ * Retrieve a code of conduct by the given key. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_code_of_conduct_get_by_key(const char *key);
+
+/**
+ * Free the memory used by the client.
  */
 void
 gh_client_free();

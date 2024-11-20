@@ -98,6 +98,16 @@ make example
 - [x] List blocked users
 - [x] Block a user
 - [x] Unblock a user
+- [x] List followers
+
+### Billing
+
+- [x] Get action billing by org
+
+### Code of Conduct 
+
+- [x] Get all codes of conduct
+- [x] Get a code of conduct by key
 
 ### Rate Limit
 

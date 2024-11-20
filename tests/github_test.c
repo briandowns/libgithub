@@ -203,6 +203,10 @@ void
 test_gh_client_user_blocked_by_id(void)
 {}
 
+void
+test_gh_client_user_followers_list(void)
+{}
+
 int
 main(void)
 {
@@ -237,6 +241,7 @@ main(void)
     RUN_TEST(test_gh_client_user_by_id_hovercard_get);
     RUN_TEST(test_gh_client_user_blocked_list);
     RUN_TEST(test_gh_client_user_blocked_by_id);
+    RUN_TEST(test_gh_client_user_followers_list);
 
     gh_client_free();
 
