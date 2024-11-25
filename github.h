@@ -24,6 +24,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef __CLIENT_H
 #define __CLIENT_H
@@ -562,3 +565,6 @@ void
 gh_client_free();
 
 #endif /** end __CLIENT_H */
+#ifdef __cplusplus
+}
+#endif
