@@ -58,7 +58,7 @@
     free(url);
 
 #define CURL_CALL_ERROR_CHECK \
-    if(res != CURLE_OK) { \
+    if (res != CURLE_OK) { \
         char *err_msg = (char *)curl_easy_strerror(res); \
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char)); \
         strcpy(response->err_msg, err_msg); \
@@ -126,7 +126,7 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
     size_t realsize = size * nmemb;
     gh_client_response_t *mem = (gh_client_response_t*)clientp;
 
-    char *ptr = realloc(mem->resp, mem->size + realsize + 1);
+    char *ptr = realloc(mem->resp, mem->size + realsize+1);
 
     mem->resp = ptr;
     memcpy(&(mem->resp[mem->size]), data, realsize);
