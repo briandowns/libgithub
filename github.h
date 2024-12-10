@@ -38,6 +38,8 @@ extern "C" {
 #define GH_CLIENT_USER_BLOCKED_CODE     204
 #define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
+#define GH_CLIENT_PER_PAGE_MAX 100
+
 #define GH_API_BASE_URL   "https://api.github.com"
 #define GH_API_ORGS_URL   GH_API_BASE_URL "/orgs"
 #define GH_API_ORG_URL    GH_API_BASE_URL "/org"
