@@ -334,7 +334,18 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
 
     char *url = calloc(DEFAULT_URL_SIZE, sizeof(char));
 
-    if (opts != NULL && opts->page_url != NULL) {
+    if (opts != NULL && opts->per_page > 30) {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/releases");
+        strcat(url, "?per_page=");
+
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
+    } else if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
     } else {
         strcpy(url, GH_API_REPO_URL);
@@ -342,14 +353,6 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
         strcat(url, "/");
         strcat(url, repo);
         strcat(url, "/releases");
-    }
-
-    if (opts != NULL && opts->per_page > 30) {
-        strcat(url, "?per_page=");
-
-        char pp_val[11] = {0};
-        sprintf(pp_val, "%d", opts->per_page);
-        strcat(url, pp_val);
     }
 
     SET_BASIC_CURL_CONFIG;
