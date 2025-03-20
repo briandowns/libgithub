@@ -25,6 +25,7 @@
  * SUCH DAMAGE.
  */
 
+#include <stdint.h>
 #include <stdio.h>
 
 #include "unity.h"
@@ -124,7 +125,7 @@ void
 test_gh_client_repo_release_assets_list(void)
 {
     gh_client_response_t *res = gh_client_repo_release_assets_list(
-        "rancher", "rke2", 182819936, NULL);
+        "rancher", "rke2",  (uint16_t)182819936, NULL);
 
     //printf("%s\n", res->resp);
     TEST_ASSERT_NOT_NULL(res);
@@ -138,7 +139,7 @@ test_gh_client_repo_release_asset_get(void)
 {
     gh_client_response_t *res = gh_client_repo_release_asset_get("rancher",
                                                                  "rke2",
-                                                                 203030920);
+                                                       (uint16_t)203030920);
 
     TEST_ASSERT_NOT_NULL(res);
     TEST_ASSERT_EQUAL_INT(200, res->resp_code);

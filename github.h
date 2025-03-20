@@ -33,6 +33,7 @@ extern "C" {
 #define __CLIENT_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #define GH_CLIENT_USER_BLOCKED_CODE     204
@@ -53,10 +54,10 @@ extern "C" {
  * Contains the rate limit information returned from each API call.
  */
 typedef struct {
-    int limit;
-    int remaining;
-    int reset;
-    int used;
+    uint64_t limit;
+    uint64_t remaining;
+    uint64_t reset;
+    uint64_t used;
     char *resource;
 } gh_client_rate_limit_data_t;
 
@@ -69,7 +70,7 @@ typedef struct {
     char *resp;
     char *err_msg;
     size_t size;
-    long resp_code;
+    uint16_t resp_code;
     int err_code;
 
     // pagination fields
@@ -126,7 +127,7 @@ enum gh_issue_sort_options {
 typedef struct {
     enum gh_item_list_state state;
     enum gh_item_list_order order;
-    unsigned int per_page;
+    uint8_t per_page; // max value is currently 100
     char *page_url;
 } gh_client_pull_req_opts_t;
 
@@ -138,7 +139,7 @@ typedef struct {
     enum gh_item_list_order order;
     enum gh_issue_filters filter;
     enum gh_issue_sort_options sort;
-    unsigned int per_page;
+    uint8_t per_page;
     char *assignee;
     char *creator;
     char *mention;
@@ -155,7 +156,7 @@ typedef struct {
  * Structure used to pass pagination settings.
  */
 typedef struct {
-    unsigned int per_page;
+    uint8_t per_page;
     char *page_url;
 } gh_client_req_list_opts_t;
 
@@ -164,8 +165,8 @@ typedef struct {
  */
 typedef struct {
     char *page_url;
-    unsigned int first;
-    unsigned int last;
+    uint8_t first;
+    uint8_t last;
     char *after;
     char *before;
     char *cursor;
@@ -179,9 +180,9 @@ typedef struct {
     char *path;
     char *author;
     char *committer;
-    char *since;           // expected format: YYYY-MM-DDTHH:MM:SSZ
-    char *until;           // expected format: YYYY-MM-DDTHH:MM:SSZ
-    unsigned int per_page; // default: 30
+    char *since;      // expected format: YYYY-MM-DDTHH:MM:SSZ
+    char *until;      // expected format: YYYY-MM-DDTHH:MM:SSZ
+    uint8_t per_page; // default: 30
     char *page_url;
 } gh_client_commits_list_opts_t;
 
@@ -239,7 +240,7 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_by_id(const char *owner, const char *repo,
-                             const unsigned int id);
+                             const uint16_t id);
 
 /**
  * Create a new release for the given repository and configuration. The
@@ -260,7 +261,7 @@ gh_client_repo_release_create(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_update(const char *owner, const char *repo,
-                              const unsigned int id, const char *data);
+                              const uint16_t id, const char *data);
 
 /**
  * Delete a release for the given repository and configuration. The response
@@ -268,7 +269,7 @@ gh_client_repo_release_update(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_delete(const char *owner, const char *repo,
-                              const unsigned int id);
+                              const uint16_t id);
 
 /**
  * Generate release notes content for a release. The response memory needs to
@@ -291,7 +292,7 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_assets_list(const char *owner, const char *repo,
-                                   const unsigned int id,
+                                   const uint16_t id,
                                    const gh_client_req_list_opts_t *opts);
 
 /**
@@ -300,7 +301,7 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_asset_get(const char *owner, const char *repo,
-                                  const unsigned int id);
+                                  const uint16_t id);
 
 /**
  * Retrieve commits for a given repository. The response memory needs to be
@@ -397,7 +398,7 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_pull_request_get(const char *owner, const char *repo,
-                                const unsigned int id,
+                                const uint16_t id,
                                 const gh_client_pull_req_opts_t *opts);
 
 /**
@@ -498,8 +499,7 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data);
  * freed by the caller.
  */
 gh_client_response_t*
-gh_client_issue_get(const char *owner, const char *repo,
-                    const int unsigned id);
+gh_client_issue_get(const char *owner, const char *repo, const uint16_t id);
 
 /**
  * Update the issue based on the given id. The response memory needs to be
@@ -512,7 +512,7 @@ gh_client_issue_get(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_update(const char *owner, const char *repo,
-                       const int unsigned id, const char *data);
+                       const uint16_t id, const char *data);
 
 /**
  * Lock an issue. The response memory needs to be freed by the caller.
@@ -527,7 +527,7 @@ gh_client_issue_update(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
-                     const int unsigned id, const char *data);
+                     const uint16_t id, const char *data);
 
 /**
  * Unlock an issue. The response memory needs to be freed by the caller.
@@ -538,7 +538,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_unlock(const char *owner, const char *repo,
-                       const int unsigned id);
+                       const uint16_t id);
 
 /**
  * Retrieve the action billing information for the given organization. The
