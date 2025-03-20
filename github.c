@@ -27,6 +27,7 @@
 
 #define _DEFAULT_SOURCE
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,24 +47,24 @@
 #define DEFAULT_URL_SIZE        2048
 #define DEFAULT_USER_AGENT_SIZE 255
 
-#define SET_BASIC_CURL_CONFIG \
-    curl_easy_setopt(curl, CURLOPT_URL, url); \
+#define SET_BASIC_CURL_CONFIG                           \
+    curl_easy_setopt(curl, CURLOPT_URL, url);           \
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); \
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk); \
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb); \
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);  \
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);  \
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)response);
 
-#define CALL_CLEANUP \
+#define CALL_CLEANUP            \
     curl_slist_free_all(chunk); \
     free(url);
 
-#define CURL_CALL_ERROR_CHECK \
-    if (res != CURLE_OK) { \
-        char *err_msg = (char *)curl_easy_strerror(res); \
+#define CURL_CALL_ERROR_CHECK                                        \
+    if (res != CURLE_OK) {                                           \
+        char *err_msg = (char *)curl_easy_strerror(res);             \
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char)); \
-        strcpy(response->err_msg, err_msg); \
-        CALL_CLEANUP; \
-        return response; \
+        strcpy(response->err_msg, err_msg);                          \
+        CALL_CLEANUP;                                                \
+        return response;                                             \
     }
 
 static CURL *curl = NULL;
@@ -431,7 +432,7 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_by_id(const char *owner, const char *repo,
-                             const unsigned int id)
+                             const uint16_t id)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -497,7 +498,7 @@ gh_client_repo_release_create(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_update(const char *owner, const char *repo,
-                              const unsigned int id, const char *data)
+                              const uint16_t id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -533,7 +534,7 @@ gh_client_repo_release_update(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_delete(const char *owner, const char *repo,
-                              const unsigned int id)
+                              const uint16_t id)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -600,7 +601,7 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_assets_list(const char *owner, const char *repo,
-                                   const unsigned int id,
+                                   const uint16_t id,
                                    const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
@@ -649,7 +650,7 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_asset_get(const char *owner, const char *repo,
-                                  const unsigned int id)
+                                 const uint16_t id)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1097,7 +1098,7 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_pull_request_get(const char *owner, const char *repo,
-                                const int unsigned id,
+                                const uint16_t id,
                                 const gh_client_pull_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
@@ -1616,7 +1617,7 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data)
 
 gh_client_response_t*
 gh_client_issue_get(const char *owner, const char *repo,
-                    const int unsigned id)
+                    const uint16_t id)
 {
         gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1650,7 +1651,7 @@ gh_client_issue_get(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_update(const char *owner, const char *repo,
-                       const int unsigned id, const char *data)
+                       const uint16_t id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1686,7 +1687,7 @@ gh_client_issue_update(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
-                     const int unsigned id, const char *data)
+                     const uint16_t id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
@@ -1723,7 +1724,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_unlock(const char *owner, const char *repo,
-                       const int unsigned id)
+                       const uint16_t id)
 {
     gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
