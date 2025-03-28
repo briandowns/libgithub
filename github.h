@@ -59,7 +59,6 @@ typedef struct {
     int remaining;
     int reset;
     int used;
-    char *resource;
 } gh_client_rate_limit_data_t;
 
 /**

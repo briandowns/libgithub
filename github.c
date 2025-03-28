@@ -35,8 +35,8 @@
 
 #include "github.h"
 
-#define GH_REQ_JSON_HEADER   "Accept: application/vnd.github+json"
-#define GH_REQ_VER_HEADER    "X-GitHub-Api-Version: 2022-11-28"
+#define GH_REQ_JSON_HEADER "Accept: application/vnd.github+json"
+#define GH_REQ_VER_HEADER  "X-GitHub-Api-Version: 2022-11-28"
 
 // the GitHub API requires a user agent to be set so we 
 // check if one is set and set one if not.
@@ -47,7 +47,7 @@
 #define DEFAULT_USER_AGENT_SIZE 255
 
 #define SET_BASIC_CURL_CONFIG \
-    curl_easy_setopt(curl, CURLOPT_URL, url); \
+    curl_easy_setopt(curl, CURLOPT_URL, &url); \
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); \
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk); \
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb); \
@@ -97,13 +97,7 @@ gh_client_response_free(gh_client_response_t *res)
         if (res->resp != NULL) free(res->resp);
         if (res->err_msg != NULL) free(res->err_msg);
 
-        if (res->rate_limit_data != NULL) {
-            if (res->rate_limit_data->resource != NULL) {
-                free(res->rate_limit_data->resource);
-            }
-            free(res->rate_limit_data);
-        }
-
+        if (res->rate_limit_data != NULL) free(res->rate_limit_data);
         free(res);
         res = NULL;
     }
@@ -116,14 +110,14 @@ static size_t
 cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
     size_t realsize = size * nmemb;
-    gh_client_response_t *mem = (gh_client_response_t*)clientp;
+    gh_client_response_t *res = (gh_client_response_t*)clientp;
 
-    char *ptr = realloc(mem->resp, mem->size + realsize+1);
+    char *ptr = realloc(res->resp, res->size + realsize+1);
 
-    mem->resp = ptr;
-    memcpy(&(mem->resp[mem->size]), data, realsize);
-    mem->size += realsize;
-    mem->resp[mem->size] = 0;
+    res->resp = ptr;
+    memcpy(res->resp, data, realsize);
+    res->size += realsize;
+    res->resp[res->size] = 0;
 
     return realsize;
 }
@@ -131,14 +125,14 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
 /**
  * Trim unnecessary whitespace from the given string. 
  */
-static char*
+void
 trim_whitespace(char *str)
 {
     while (isspace((unsigned char)*str)) {
         str++;
     }
     if (*str == 0) {
-        return str;
+        return;
     }
 
     char *end = str + strlen(str) - 1;
@@ -146,8 +140,6 @@ trim_whitespace(char *str)
         end--;
     }
     end[1] = '\0';
-
-    return str;
 }
 
 typedef struct {
@@ -201,25 +193,20 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 
     if (key != NULL && value != NULL) {
         if (strcmp(key, "x-ratelimit-limit") == 0) {
-            char *v = trim_whitespace(value);
-            response->rate_limit_data->limit = atoi(v);
+            trim_whitespace(value);
+            response->rate_limit_data->limit = atoi(value);
         }
         if (strcmp(key, "x-ratelimit-remaining") == 0) {
-            char *v = trim_whitespace(value);
-            response->rate_limit_data->remaining = atoi(v);
+            trim_whitespace(value);
+            response->rate_limit_data->remaining = atoi(value);
         }
         if (strcmp(key, "x-ratelimit-reset") == 0) {
-            char *v = trim_whitespace(value);
-            response->rate_limit_data->reset = atoi(v);
+            trim_whitespace(value);
+            response->rate_limit_data->reset = atoi(value);
         }
         if (strcmp(key, "x-ratelimit-used") == 0) {
-            char *v = trim_whitespace(value);
-            response->rate_limit_data->used = atoi(v);
-        }
-        if (strcmp(key, "x-ratelimit-resource") == 0) {
-            char *v = trim_whitespace(value);
-            response->rate_limit_data->resource = calloc(strlen(v), sizeof(char));
-            strcpy(response->rate_limit_data->resource, v);
+            trim_whitespace(value);
+            response->rate_limit_data->used = atoi(value);
         }
 
         if (strcmp(key, "link") == 0) {
@@ -238,17 +225,17 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 
             for (int i = 0; i < link_count; i++) {
                 if (strcmp(links[i].rel, "first\"") == 0) {
-                    strcpy(response->first_link, links[i].url);
+                    strncpy(response->first_link, links[i].url, GH_MAX_URL_LEN);
                 }
                 if (strcmp(links[i].rel, "prev\"") == 0) {
-                    strcpy(response->prev_link, links[i].url);
+                    strncpy(response->prev_link, links[i].url, GH_MAX_URL_LEN);
                 }
                 if (strcmp(links[i].rel, "next\"") == 0) {
-                    strcpy(response->next_link, links[i].url);
+                    strncpy(response->next_link, links[i].url, GH_MAX_URL_LEN);
                 }
 
                 if (strcmp(links[i].rel, "last\"") == 0) {
-                    strcpy(response->last_link, links[i].url);
+                    strncpy(response->last_link, links[i].url, GH_MAX_URL_LEN);
                 }
 
                 free(links[i].url);
@@ -282,7 +269,7 @@ gh_client_octocat_says()
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char *url = GH_API_BASE_URL "/octocat";
+    char url[GH_MAX_URL_LEN] = GH_API_BASE_URL "/octocat";
     SET_BASIC_CURL_CONFIG;
 
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -294,7 +281,7 @@ gh_client_octocat_says()
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
 
     if (res != CURLE_OK) {
-        char *err_msg = (char *)curl_easy_strerror(res);
+        char *err_msg = (char*)curl_easy_strerror(res);
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
         strcpy(response->err_msg, err_msg);
 
@@ -1367,8 +1354,7 @@ gh_client_user_rate_limit_info()
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_BASE_URL "/rate_limit");
+    char url[DEFAULT_URL_SIZE] = GH_API_BASE_URL "/rate_limit";
 
     SET_BASIC_CURL_CONFIG;
 
@@ -1582,8 +1568,7 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_REPO_URL);
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
     strcat(url, owner);
     strcat(url, "/");
     strcat(url, repo);
@@ -1606,7 +1591,7 @@ gh_client_response_t*
 gh_client_issue_get(const char *owner, const char *repo,
                     const int unsigned id)
 {
-        gh_client_response_t *response = gh_client_response_new();
+    gh_client_response_t *response = gh_client_response_new();
     struct curl_slist *chunk = NULL;
 
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
@@ -1614,8 +1599,7 @@ gh_client_issue_get(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_REPO_URL);
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
     strcat(url, owner);
     strcat(url, "/");
     strcat(url, repo);
@@ -1648,8 +1632,7 @@ gh_client_issue_update(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_REPO_URL);
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
     strcat(url, owner);
     strcat(url, "/");
     strcat(url, repo);
@@ -1684,8 +1667,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_REPO_URL);
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
     strcat(url, owner);
     strcat(url, "/");
     strcat(url, repo);
@@ -1721,8 +1703,7 @@ gh_client_issue_unlock(const char *owner, const char *repo,
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_REPO_URL);
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
     strcat(url, owner);
     strcat(url, "/");
     strcat(url, repo);
@@ -1756,8 +1737,7 @@ gh_client_actions_billing_by_org(const char *org)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_ORGS_URL);
+    char url[DEFAULT_URL_SIZE] = GH_API_ORGS_URL;
     strcat(url, "/");
     strcat(url, org);
     strcat(url, "/settings/billing/actions");
@@ -1784,9 +1764,7 @@ gh_client_codes_of_conduct_list()
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_BASE_URL);
-    strcat(url, "/codes_of_conduct");
+    char url[DEFAULT_URL_SIZE] = GH_API_BASE_URL "/codes_of_conduct";
 
     SET_BASIC_CURL_CONFIG;
 
@@ -1810,8 +1788,7 @@ gh_client_code_of_conduct_get_by_key(const char *key)
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
     chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
 
-    char url[DEFAULT_URL_SIZE] = {0};
-    strcpy(url, GH_API_BASE_URL "/codes_of_conduct/");
+    char url[DEFAULT_URL_SIZE] = GH_API_BASE_URL "/codes_of_conduct/";
     strcat(url, key);
 
     SET_BASIC_CURL_CONFIG;

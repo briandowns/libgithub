@@ -78,7 +78,7 @@ test_gh_client_repo_releases_list_nonpaginated(void)
                                                              "spinner", NULL);
 
     TEST_ASSERT_NOT_NULL(res);
-    TEST_ASSERT_NULL(res->next_link);
+    TEST_ASSERT_EQUAL_INT(strlen(res->next_link), 0);
 
     gh_client_response_free(res);
 }
@@ -126,7 +126,6 @@ test_gh_client_repo_release_assets_list(void)
     gh_client_response_t *res = gh_client_repo_release_assets_list(
         "rancher", "rke2", 182819936, NULL);
 
-    //printf("%s\n", res->resp);
     TEST_ASSERT_NOT_NULL(res);
     TEST_ASSERT_EQUAL_INT(200, res->resp_code);
 
