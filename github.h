@@ -49,6 +49,8 @@ extern "C" {
 #define GH_API_ISSUE_URL  GH_API_BASE_URL "/issue"
 #define GH_API_ISSUES_URL GH_API_BASE_URL "/issues"
 
+#define GH_MAX_URL_LEN 2048
+
 /**
  * Contains the rate limit information returned from each API call.
  */
@@ -73,10 +75,10 @@ typedef struct {
     int err_code;
 
     // pagination fields
-    char *first_link;
-    char *next_link;
-    char *prev_link;
-    char *last_link;
+    char first_link[GH_MAX_URL_LEN];
+    char next_link[GH_MAX_URL_LEN];
+    char prev_link[GH_MAX_URL_LEN];
+    char last_link[GH_MAX_URL_LEN];
 
     gh_client_rate_limit_data_t *rate_limit_data;
 } gh_client_response_t;

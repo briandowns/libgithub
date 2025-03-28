@@ -96,10 +96,6 @@ gh_client_response_free(gh_client_response_t *res)
     if (res != NULL) {
         if (res->resp != NULL) free(res->resp);
         if (res->err_msg != NULL) free(res->err_msg);
-        if (res->first_link != NULL) free(res->first_link);
-        if (res->next_link != NULL) free(res->next_link);
-        if (res->prev_link != NULL) free(res->prev_link);
-        if (res->last_link != NULL) free(res->last_link);
 
         if (res->rate_limit_data != NULL) {
             if (res->rate_limit_data->resource != NULL) {
@@ -242,20 +238,16 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 
             for (int i = 0; i < link_count; i++) {
                 if (strcmp(links[i].rel, "first\"") == 0) {
-                    response->first_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->first_link, links[i].url);
                 }
                 if (strcmp(links[i].rel, "prev\"") == 0) {
-                    response->prev_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->prev_link, links[i].url);
                 }
                 if (strcmp(links[i].rel, "next\"") == 0) {
-                    response->next_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->next_link, links[i].url);
                 }
 
                 if (strcmp(links[i].rel, "last\"") == 0) {
-                    response->last_link = calloc(strlen(links[i].url)+1, sizeof(char));
                     strcpy(response->last_link, links[i].url);
                 }
 
