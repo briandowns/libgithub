@@ -61,6 +61,7 @@ typedef struct {
     uint64_t remaining;
     uint64_t reset;
     uint64_t used;
+    char *resource;
 } gh_client_rate_limit_data_t;
 
 /**
@@ -81,11 +82,7 @@ typedef struct {
     char prev_link[GH_MAX_URL_LEN];
     char last_link[GH_MAX_URL_LEN];
 
-    // rate limit fields
-    uint64_t rate_limit_count;
-    uint64_t rate_limit_remaining;
-    uint64_t rate_limit_reset;
-    uint64_t rate_limit_used;
+    gh_client_rate_limit_data_t *rate_limit_data;
 } gh_client_response_t;
 
 /**

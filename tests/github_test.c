@@ -63,10 +63,11 @@ test_gh_client_res_rate_limit(void)
     gh_client_response_t *res = gh_client_octocat_says();
 
     TEST_ASSERT_NOT_NULL(res);
-    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_count);
-    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_remaining);
-    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_reset);
-    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_used);
+    TEST_ASSERT_NOT_NULL(res->rate_limit_data);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->limit);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->remaining);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->reset);
+    TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->used);
 
     gh_client_response_free(res);
 }

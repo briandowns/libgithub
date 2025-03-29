@@ -102,6 +102,13 @@ gh_client_response_free(gh_client_response_t *res)
             free(res->err_msg);
         }
 
+        if (res->rate_limit_data != NULL) {
+            if (res->rate_limit_data->resource != NULL) {
+                free(res->rate_limit_data->resource);
+            }
+            free(res->rate_limit_data);
+        }
+
         free(res);
         res = NULL;
     }
@@ -129,26 +136,6 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
 
     return realsize;
 }
-
-/**
- * Trim unnecessary whitespace from the given string. 
- */
-// void
-// trim_whitespace(char *str)
-// {
-//     while (isspace((unsigned char)*str)) {
-//         str++;
-//     }
-//     if (*str == 0) {
-//         return;
-//     }
-
-//     char *end = str + strlen(str) - 1;
-//     while (end > str && isspace((unsigned char)*end)) {
-//         end--;
-//     }
-//     end[1] = '\0';
-// }
 
 typedef struct {
     char url[GH_MAX_URL_LEN];
@@ -213,17 +200,21 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 
     if (key != NULL && value != NULL) {
         if (strcmp(key, "x-ratelimit-limit") == 0) {
-            response->rate_limit_count = str_to_uint64(value);
+            response->rate_limit_data->limit = str_to_uint64(value);
         }
-        // if (strcmp(key, "x-ratelimit-remaining") == 0) {
-        //     response->rate_limit_remaining = str_to_uint64(value);
-        // }
-        // if (strcmp(key, "x-ratelimit-reset") == 0) {
-        //     response->rate_limit_reset = str_to_uint64(value);
-        // }
-        // if (strcmp(key, "x-ratelimit-used") == 0) {
-        //     response->rate_limit_used = str_to_uint64(value);
-        // }
+        if (strcmp(key, "x-ratelimit-remaining") == 0) {
+            response->rate_limit_data->remaining = str_to_uint64(value);
+        }
+        if (strcmp(key, "x-ratelimit-reset") == 0) {
+            response->rate_limit_data->reset = str_to_uint64(value);
+        }
+        if (strcmp(key, "x-ratelimit-used") == 0) {
+            response->rate_limit_data->used = str_to_uint64(value);
+        }
+        if (strcmp(key, "x-ratelimit-resource") == 0) {
+            response->rate_limit_data->resource = calloc(strlen(value)+1, sizeof(char));
+            strcpy(response->rate_limit_data->resource, value);
+        }
 
         if (strcmp(key, "link") == 0) {
             int link_count = 0;
@@ -269,10 +260,7 @@ static gh_client_response_t*
 gh_client_response_new()
 {
     gh_client_response_t *resp = calloc(1, sizeof(gh_client_response_t));
-    resp->rate_limit_count = 0;
-    resp->rate_limit_remaining = 0;
-    resp->rate_limit_reset = 0;
-    resp->rate_limit_used = 0;
+    resp->rate_limit_data = calloc(1, sizeof(gh_client_rate_limit_data_t));
 
     return resp;
 }

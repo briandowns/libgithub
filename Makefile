@@ -31,7 +31,7 @@ tests: clean
 
 .PHONY: valgrind
 valgrind: tests
-	valgrind --leak-check=full ./tests/tests 2>&1 | awk -F':' '/definitely lost:/ {print $2}'
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --tool=memcheck ./tests/tests 2>&1 | awk -F':' '/definitely lost:/ {print $2}'
 
 .PHONY: install
 install: 
