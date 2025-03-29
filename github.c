@@ -47,22 +47,22 @@
 #define DEFAULT_URL_SIZE        2048
 #define DEFAULT_USER_AGENT_SIZE 255
 
-#define SET_BASIC_CURL_CONFIG \
-    curl_easy_setopt(curl, CURLOPT_URL, &url); \
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L); \
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk); \
+#define SET_BASIC_CURL_CONFIG                                  \
+    curl_easy_setopt(curl, CURLOPT_URL, &url);                 \
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);        \
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);         \
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb); \
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response); \
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb); \
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);      \
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb);         \
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)response);
 
-#define CURL_CALL_ERROR_CHECK \
-    if (res != CURLE_OK) { \
-        char *err_msg = (char *)curl_easy_strerror(res); \
+#define CURL_CALL_ERROR_CHECK                                        \
+    if (res != CURLE_OK) {                                           \
+        char *err_msg = (char *)curl_easy_strerror(res);             \
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char)); \
-        strcpy(response->err_msg, err_msg); \
-        curl_slist_free_all(chunk); \
-        return response; \
+        strcpy(response->err_msg, err_msg);                          \
+        curl_slist_free_all(chunk);                                  \
+        return response;                                             \
     }
 
 static CURL *curl = NULL;
