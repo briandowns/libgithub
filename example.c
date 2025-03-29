@@ -38,10 +38,11 @@ main(void)
         printf("%s\n", res->resp);
     }
     
-    printf("Limit: %" PRIu64 "\n", res->rate_limit_count);
-    printf("remaining: %" PRIu64 "\n", res->rate_limit_remaining);
-    printf("reset: %" PRIu64 "\n", res->rate_limit_reset);
-    printf("used: %" PRIu64 "\n", res->rate_limit_used);
+    printf("Limit: %" PRIu64 "\n", res->rate_limit_data->limit);
+    printf("remaining: %" PRIu64 "\n", res->rate_limit_data->remaining);
+    printf("reset: %" PRIu64 "\n", res->rate_limit_data->reset);
+    printf("used: %" PRIu64 "\n", res->rate_limit_data->used);
+    printf("resource: %s\n", res->rate_limit_data->resource);
 
     printf("Next: %s\n", res->next_link);
     printf("Last: %s\n", res->last_link);
