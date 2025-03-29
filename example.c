@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,22 +28,24 @@ main(void)
     // printf("%ld\n", res->resp_code);
     // gh_client_response_free(res);
 
-    // res = gh_client_repo_releases_list("rancher", "rke2", NULL);
-    // if (res->err_msg != NULL) {
-    //     printf("%s\n", res->err_msg);
-    //     gh_client_response_free(res);
-    //     return 1;
-    // }
-    // printf("%s\n", res->resp);
-    // printf("Limit: %d\n", res->rate_limit_data->limit);
-    // printf("remaining: %d\n", res->rate_limit_data->remaining);
-    // printf("reset: %d\n", res->rate_limit_data->reset);
-    // printf("used: %d\n", res->rate_limit_data->used);
-    // printf("resource: %s\n", res->rate_limit_data->resource);
+    gh_client_response_t *res = gh_client_repo_releases_list("rancher", "rke2", NULL);
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    if (res->resp != NULL) {
+        printf("%s\n", res->resp);
+    }
+    
+    printf("Limit: %" PRIu64 "\n", res->rate_limit_count);
+    printf("remaining: %" PRIu64 "\n", res->rate_limit_remaining);
+    printf("reset: %" PRIu64 "\n", res->rate_limit_reset);
+    printf("used: %" PRIu64 "\n", res->rate_limit_used);
 
-    // printf("Next: %s\n", res->next_link);
-    // printf("Last: %s\n", res->last_link);
-    // gh_client_response_free(res);
+    printf("Next: %s\n", res->next_link);
+    printf("Last: %s\n", res->last_link);
+    gh_client_response_free(res);
 
     // gh_client_req_list_opts_t opts = {
     //     .per_page = 100
@@ -399,14 +402,14 @@ main(void)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    gh_client_response_t *res = gh_client_user_rate_limit_info(); 
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    printf("%s\n", res->resp);
-    gh_client_response_free(res);
+    // gh_client_response_t *res = gh_client_user_rate_limit_info(); 
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // printf("%s\n", res->resp);
+    // gh_client_response_free(res);
 
     gh_client_free();
     

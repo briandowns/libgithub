@@ -27,6 +27,7 @@
 
 #define _DEFAULT_SOURCE
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,10 +95,13 @@ void
 gh_client_response_free(gh_client_response_t *res)
 {
     if (res != NULL) {
-        if (res->resp != NULL) free(res->resp);
-        if (res->err_msg != NULL) free(res->err_msg);
+        if (res->resp != NULL) {
+            free(res->resp);
+        }
+        if (res->err_msg != NULL) {
+            free(res->err_msg);
+        }
 
-        if (res->rate_limit_data != NULL) free(res->rate_limit_data);
         free(res);
         res = NULL;
     }
@@ -112,9 +116,13 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
     size_t realsize = size * nmemb;
     gh_client_response_t *res = (gh_client_response_t*)clientp;
 
-    char *ptr = realloc(res->resp, res->size + realsize+1);
+    if (res->resp == NULL) {
+        res->resp = calloc(res->size + realsize+1, sizeof(char));
+    }else {
+        char *ptr = realloc(res->resp, res->size + realsize+1);
+        res->resp = ptr;
+    }
 
-    res->resp = ptr;
     memcpy(res->resp, data, realsize);
     res->size += realsize;
     res->resp[res->size] = 0;
@@ -125,26 +133,26 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
 /**
  * Trim unnecessary whitespace from the given string. 
  */
-void
-trim_whitespace(char *str)
-{
-    while (isspace((unsigned char)*str)) {
-        str++;
-    }
-    if (*str == 0) {
-        return;
-    }
+// void
+// trim_whitespace(char *str)
+// {
+//     while (isspace((unsigned char)*str)) {
+//         str++;
+//     }
+//     if (*str == 0) {
+//         return;
+//     }
 
-    char *end = str + strlen(str) - 1;
-    while (end > str && isspace((unsigned char)*end)) {
-        end--;
-    }
-    end[1] = '\0';
-}
+//     char *end = str + strlen(str) - 1;
+//     while (end > str && isspace((unsigned char)*end)) {
+//         end--;
+//     }
+//     end[1] = '\0';
+// }
 
 typedef struct {
-    char *url;
-    char *rel;
+    char url[GH_MAX_URL_LEN];
+    char rel[GH_MAX_URL_LEN];
 } link_t;
 
 /**
@@ -166,8 +174,8 @@ parse_link_header(const char *header, link_t *links, int count)
             *url_end = '\0';
             *rel_end = '\0';
 
-            links[link_count].url = strdup(url_start + 1);
-            links[link_count].rel = strdup(rel_start + 5);
+            strcpy(links[link_count].url, url_start);
+            strcpy(links[link_count].rel, rel_start);
 
             link_count++;
         }
@@ -176,6 +184,18 @@ parse_link_header(const char *header, link_t *links, int count)
     }
 
     return link_count;
+}
+
+static inline uint64_t
+str_to_uint64(const char *str)
+{
+    char *endptr;
+    uint64_t result = strtoull(str, &endptr, 10);
+    if (*endptr != '\0') {
+        return 0;
+    }
+
+    return result;
 }
 
 /**
@@ -193,21 +213,17 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 
     if (key != NULL && value != NULL) {
         if (strcmp(key, "x-ratelimit-limit") == 0) {
-            trim_whitespace(value);
-            response->rate_limit_data->limit = atoi(value);
+            response->rate_limit_count = str_to_uint64(value);
         }
-        if (strcmp(key, "x-ratelimit-remaining") == 0) {
-            trim_whitespace(value);
-            response->rate_limit_data->remaining = atoi(value);
-        }
-        if (strcmp(key, "x-ratelimit-reset") == 0) {
-            trim_whitespace(value);
-            response->rate_limit_data->reset = atoi(value);
-        }
-        if (strcmp(key, "x-ratelimit-used") == 0) {
-            trim_whitespace(value);
-            response->rate_limit_data->used = atoi(value);
-        }
+        // if (strcmp(key, "x-ratelimit-remaining") == 0) {
+        //     response->rate_limit_remaining = str_to_uint64(value);
+        // }
+        // if (strcmp(key, "x-ratelimit-reset") == 0) {
+        //     response->rate_limit_reset = str_to_uint64(value);
+        // }
+        // if (strcmp(key, "x-ratelimit-used") == 0) {
+        //     response->rate_limit_used = str_to_uint64(value);
+        // }
 
         if (strcmp(key, "link") == 0) {
             int link_count = 0;
@@ -225,21 +241,20 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 
             for (int i = 0; i < link_count; i++) {
                 if (strcmp(links[i].rel, "first\"") == 0) {
-                    strncpy(response->first_link, links[i].url, GH_MAX_URL_LEN);
+                    strcpy(response->first_link, links[i].url);
                 }
                 if (strcmp(links[i].rel, "prev\"") == 0) {
-                    strncpy(response->prev_link, links[i].url, GH_MAX_URL_LEN);
+                    strcpy(response->prev_link, links[i].url);
                 }
                 if (strcmp(links[i].rel, "next\"") == 0) {
-                    strncpy(response->next_link, links[i].url, GH_MAX_URL_LEN);
+                    printf("%s\n", links[i].url);
+                    strcpy(response->next_link, links[i].url);
                 }
 
                 if (strcmp(links[i].rel, "last\"") == 0) {
-                    strncpy(response->last_link, links[i].url, GH_MAX_URL_LEN);
+                    printf("%s\n", links[i].url);
+                    strcpy(response->last_link, links[i].url);
                 }
-
-                free(links[i].url);
-                free(links[i].rel);
             }
         }
     }
@@ -254,7 +269,10 @@ static gh_client_response_t*
 gh_client_response_new()
 {
     gh_client_response_t *resp = calloc(1, sizeof(gh_client_response_t));
-    resp->rate_limit_data = calloc(1, sizeof(gh_client_rate_limit_data_t));
+    resp->rate_limit_count = 0;
+    resp->rate_limit_remaining = 0;
+    resp->rate_limit_reset = 0;
+    resp->rate_limit_used = 0;
 
     return resp;
 }
@@ -363,6 +381,8 @@ gh_client_repo_releases_latest(const char *owner, const char *repo)
     strcat(url, "/releases/latest");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -394,6 +414,8 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
     strcat(url, tag);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -428,6 +450,8 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
     strcat(url, id_val);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -530,6 +554,8 @@ gh_client_repo_release_delete(const char *owner, const char *repo,
     strcat(url, id_val);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
 
     CURLcode res = curl_easy_perform(curl);
@@ -561,6 +587,8 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
     strcat(url, "/releases/generate-notes");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -612,6 +640,8 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -647,6 +677,8 @@ gh_client_repo_release_asset_get(const char *owner, const char *repo,
 
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -720,6 +752,8 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -767,6 +801,8 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -799,6 +835,8 @@ gh_client_repo_commit_get(const char *owner, const char *repo,
     strcat(url, sha);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -833,6 +871,8 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
     strcat(url, head);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -876,6 +916,8 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -907,6 +949,8 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
     strcat(url, branch);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -939,6 +983,8 @@ gh_client_repo_branch_rename(const char *owner, const char *repo,
     strcat(url, "/rename");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -973,6 +1019,8 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
     strcat(url, "/merge-upstream");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -1005,6 +1053,8 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
     strcat(url, "/merges");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -1060,6 +1110,8 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1104,6 +1156,8 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1129,6 +1183,8 @@ gh_client_user_logged_in_get()
     strcpy(url, GH_API_USER_URL);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1155,6 +1211,8 @@ gh_client_user_by_id_get(const char *username)
     strcat(url, username);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1182,6 +1240,8 @@ gh_client_user_by_id_hovercard_get(const char *username)
     strcat(url, "/hovercard");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1220,6 +1280,8 @@ gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts)
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1246,6 +1308,8 @@ gh_client_user_blocked_by_id(const char *username)
     strcat(url, username);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1272,6 +1336,8 @@ gh_client_user_block_by_id(const char *username)
     strcat(url, username);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); 
 
     CURLcode res = curl_easy_perform(curl);
@@ -1299,6 +1365,8 @@ gh_client_user_unblock_by_id(const char *username)
     strcat(url, username);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE"); 
 
     CURLcode res = curl_easy_perform(curl);
@@ -1333,6 +1401,8 @@ gh_client_user_followers_list(const gh_client_req_list_opts_t *opts)
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1357,6 +1427,8 @@ gh_client_user_rate_limit_info()
     char url[DEFAULT_URL_SIZE] = GH_API_BASE_URL "/rate_limit";
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1442,6 +1514,8 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1547,6 +1621,8 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
     }
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1575,6 +1651,8 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data)
     strcat(url, "/issues");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -1610,6 +1688,8 @@ gh_client_issue_get(const char *owner, const char *repo,
     strcat(url, id_val);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1643,6 +1723,8 @@ gh_client_issue_update(const char *owner, const char *repo,
     strcat(url, id_val);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -1679,6 +1761,8 @@ gh_client_issue_lock(const char *owner, const char *repo,
     strcat(url, "/lock");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
@@ -1715,6 +1799,8 @@ gh_client_issue_unlock(const char *owner, const char *repo,
     strcat(url, "/lock");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
 
     CURLcode res = curl_easy_perform(curl);
@@ -1743,6 +1829,8 @@ gh_client_actions_billing_by_org(const char *org)
     strcat(url, "/settings/billing/actions");
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1767,6 +1855,8 @@ gh_client_codes_of_conduct_list()
     char url[DEFAULT_URL_SIZE] = GH_API_BASE_URL "/codes_of_conduct";
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
@@ -1792,6 +1882,8 @@ gh_client_code_of_conduct_get_by_key(const char *key)
     strcat(url, key);
 
     SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
 
     CURLcode res = curl_easy_perform(curl);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);

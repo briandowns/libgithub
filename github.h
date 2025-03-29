@@ -25,6 +25,7 @@
  * SUCH DAMAGE.
  */
 
+#include <sys/types.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +34,7 @@ extern "C" {
 #define __CLIENT_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #define GH_CLIENT_USER_BLOCKED_CODE     204
@@ -55,10 +57,10 @@ extern "C" {
  * Contains the rate limit information returned from each API call.
  */
 typedef struct {
-    int limit;
-    int remaining;
-    int reset;
-    int used;
+    uint64_t limit;
+    uint64_t remaining;
+    uint64_t reset;
+    uint64_t used;
 } gh_client_rate_limit_data_t;
 
 /**
@@ -79,7 +81,11 @@ typedef struct {
     char prev_link[GH_MAX_URL_LEN];
     char last_link[GH_MAX_URL_LEN];
 
-    gh_client_rate_limit_data_t *rate_limit_data;
+    // rate limit fields
+    uint64_t rate_limit_count;
+    uint64_t rate_limit_remaining;
+    uint64_t rate_limit_reset;
+    uint64_t rate_limit_used;
 } gh_client_response_t;
 
 /**
