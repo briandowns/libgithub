@@ -74,7 +74,6 @@ typedef struct {
     char *err_msg;
     size_t size;
     long resp_code;
-    int err_code;
 
     // pagination fields
     char first_link[GH_MAX_URL_LEN];
@@ -82,6 +81,7 @@ typedef struct {
     char prev_link[GH_MAX_URL_LEN];
     char last_link[GH_MAX_URL_LEN];
 
+    // rate limit information
     gh_client_rate_limit_data_t *rate_limit_data;
 } gh_client_response_t;
 
