@@ -72,7 +72,7 @@ typedef struct {
 typedef struct {
     char *resp;
     char *err_msg;
-    uint64_t size;
+    size_t size;
     uint16_t resp_code;
 
     // pagination fields

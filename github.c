@@ -132,7 +132,7 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
         res->resp = ptr;
     }
 
-    memcpy(res->resp, data, realsize);
+    memcpy(&(res->resp[res->size]), data, realsize);
     res->size += realsize;
     res->resp[res->size] = 0;
 
