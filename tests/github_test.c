@@ -52,8 +52,6 @@ void
 test_gh_client_octocat_says(void)
 {
     gh_client_response_t *res = gh_client_octocat_says();
-    printf("%" PRId64 "\n", res->size);
-    printf("%s\n", res->resp);
 
     TEST_ASSERT_NOT_NULL(res);
 
@@ -64,8 +62,7 @@ void
 test_gh_client_res_rate_limit(void)
 {
     gh_client_response_t *res = gh_client_octocat_says();
-    printf("%" PRId64 "\n", res->size);
-    printf("%s\n", res->resp);
+
     TEST_ASSERT_NOT_NULL(res);
     TEST_ASSERT_NOT_NULL(res->rate_limit_data);
     TEST_ASSERT_GREATER_OR_EQUAL_INT(0, res->rate_limit_data->limit);
@@ -81,8 +78,7 @@ test_gh_client_repo_releases_list_nonpaginated(void)
 {
     gh_client_response_t *res = gh_client_repo_releases_list("briandowns",
                                                              "spinner", NULL);
-    printf("%" PRId64 "\n", res->size);
-    printf("%s\n", res->resp);
+
     TEST_ASSERT_NOT_NULL(res);
     TEST_ASSERT_EQUAL_INT((int)strlen(res->next_link), 0);
 
@@ -94,8 +90,7 @@ test_gh_client_repo_releases_list_paginated(void)
 {
     gh_client_response_t *res = gh_client_repo_releases_list("rancher",
                                                              "rke2", NULL);
-    printf("%" PRId64 "\n", res->size);
-    printf("%s\n", res->resp);
+
     TEST_ASSERT_NOT_NULL(res);
     TEST_ASSERT_NOT_NULL(res->next_link);
 

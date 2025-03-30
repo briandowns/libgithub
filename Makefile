@@ -27,7 +27,7 @@ endif
 tests: clean
 	$(CC) -g -o tests/tests tests/unity.c tests/github_test.c github.c $(CFLAGS) $(LDFLAGS)
 	tests/tests
-	#rm -f tests/tests
+	rm -f tests/tests
 
 .PHONY: valgrind
 valgrind: tests
