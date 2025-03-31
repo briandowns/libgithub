@@ -240,8 +240,9 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                     strcpy(response->prev_link, links[i].url);
                 }
                 if (strcmp(links[i].rel, "next\"") == 0) {
-                    printf("%s\n", links[i].url);
                     strcpy(response->next_link, links[i].url);
+                } else {
+                    response->next_link[0] = '\0';
                 }
 
                 if (strcmp(links[i].rel, "last\"") == 0) {
