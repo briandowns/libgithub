@@ -163,8 +163,8 @@ parse_link_header(const char *header, link_t *links, int count)
             *url_end = '\0';
             *rel_end = '\0';
 
-            strcpy(links[link_count].url, url_start);
-            strcpy(links[link_count].rel, rel_start);
+            strcpy(links[link_count].url, url_start + 1);
+            strcpy(links[link_count].rel, rel_start + 5);
 
             link_count++;
         }
@@ -233,20 +233,17 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
             parse_link_header(value, links, link_count);
 
             for (int i = 0; i < link_count; i++) {
-                if (strcmp(links[i].rel, "first\"") == 0) {
+                if (strstr(links[i].rel, "first") == 0) {
                     strcpy(response->first_link, links[i].url);
                 }
-                if (strcmp(links[i].rel, "prev\"") == 0) {
+                if (strstr(links[i].rel, "prev") == 0) {
                     strcpy(response->prev_link, links[i].url);
                 }
-                if (strcmp(links[i].rel, "next\"") == 0) {
+                if (strstr(links[i].rel, "next") != NULL) {
                     strcpy(response->next_link, links[i].url);
-                } else {
-                    response->next_link[0] = '\0';
                 }
 
-                if (strcmp(links[i].rel, "last\"") == 0) {
-                    printf("%s\n", links[i].url);
+                if (strstr(links[i].rel, "last") == 0) {
                     strcpy(response->last_link, links[i].url);
                 }
             }
