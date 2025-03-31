@@ -390,14 +390,13 @@
      chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
      chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
  
-     char url[DEFAULT_URL_SIZE] = {0};
-     strcpy(url, GH_API_REPO_URL);
+     char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
      strcat(url, owner);
      strcat(url, "/");
      strcat(url, repo);
      strcat(url, "/releases/tags/");
      strcat(url, tag);
- 
+     printf("%s\n", url);
      SET_BASIC_CURL_CONFIG;
  
      CURLcode res = curl_easy_perform(curl);
