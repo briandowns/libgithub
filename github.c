@@ -403,7 +403,7 @@
      strcat(url, repo);
      strcat(url, "/releases/tags/");
      strcat(url, tag);
-     printf("%s\n", url);
+ 
      SET_BASIC_CURL_CONFIG;
  
      CURLcode res = curl_easy_perform(curl);
