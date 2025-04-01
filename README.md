@@ -12,6 +12,23 @@ To initialize the library, the user's github token is required.
 gh_client_init(token);
 ```
 
+Clean up after use.
+```c
+gh_client_free();
+```
+
+### Error Handling
+
+If an error occurs during the call, the error will be put into the `response->err_msg` field and `response->resp` will be set to `NULL`.
+
+```c
+gh_client_response_t *res = gh_client_repo_release_by_tag("briandowns", "spinner", "v1.29.16");
+if (res->err_msg != NULL) {
+    fprintf(stderr, "%s\n", res->err_msg);
+    gh_client_response_free(res);
+}
+```
+
 ## Build shared object
 
 To build the shared object:

@@ -26,6 +26,7 @@
  */
 
  #define _DEFAULT_SOURCE
+ #include <ctype.h>
  #include <stdint.h>
  #include <stdio.h>
  #include <stdlib.h>
@@ -288,8 +289,15 @@
  
      if (res != CURLE_OK) {
          char *err_msg = (char*)curl_easy_strerror(res);
-         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
-         strcpy(response->err_msg, err_msg);
+         if (err_msg != NULL) {
+             response->err_msg = calloc(strlen(err_msg)+1, sizeof(char));
+             strcpy(response->err_msg, err_msg);
+         } else {
+             response->err_msg = calloc(strlen(response->resp)+1, sizeof(char));
+             strcpy(response->err_msg, response->resp);
+             free(response->resp);
+             response->resp = NULL;
+         }
  
          curl_slist_free_all(chunk);
  
