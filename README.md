@@ -123,6 +123,8 @@ make example
 
 - [x] Community Profile Metrics
 - [x] Repository Clones data
+- [x] Top 10 referral paths
+- [x] Top referral sources
 
 ### Billing
 

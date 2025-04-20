@@ -566,6 +566,18 @@ gh_client_metrics_repository_clones(const char *owner, const char *repo,
                                     const char *interval);
 
 /**
+ * Retrieve the top 10 popular contents over the last 14 days.
+ */
+gh_client_response_t*
+gh_client_metrics_top_referral_paths(const char *owner, const char *repo);
+
+/**
+ * Retrieve the top referrers over the last 14 days.
+ */
+gh_client_response_t*
+gh_client_metrics_top_referral_sources(const char *owner, const char *repo);
+
+/**
  * Retrieve all codes of conduct. The response memory needs to be freed by the
  * caller.
  */

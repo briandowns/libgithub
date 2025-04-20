@@ -1848,6 +1848,62 @@ gh_client_metrics_repository_clones(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
+gh_client_metrics_top_referral_paths(const char *owner, const char *repo)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/traffic/popular/paths");
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    curl_slist_free_all(chunk);
+
+    return response;
+}
+
+gh_client_response_t*
+gh_client_metrics_top_referral_sources(const char *owner, const char *repo)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    struct curl_slist *chunk = NULL;
+
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/traffic/popular/referrers");
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    curl_slist_free_all(chunk);
+
+    return response;
+}
+
+gh_client_response_t*
 gh_client_codes_of_conduct_list()
 {
     gh_client_response_t *response = gh_client_response_new();
