@@ -552,6 +552,20 @@ gh_client_response_t*
 gh_client_actions_billing_by_org(const char *org);
 
 /**
+ * Retrieve all community metrics for the given repository.
+ */
+gh_client_response_t*
+gh_client_metrics_community_profile(const char *owner, const char *repo);
+
+/**
+ * Retrieve total number of clones and breakdown per day or week for the last
+ * 14 days. Valid values for interval are: "day", "week".
+ */
+gh_client_response_t*
+gh_client_metrics_repository_clones(const char *owner, const char *repo,
+                                    const char *interval);
+
+/**
  * Retrieve all codes of conduct. The response memory needs to be freed by the
  * caller.
  */

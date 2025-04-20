@@ -119,6 +119,11 @@ make example
 - [x] List followers
 - [x] Get rate limit info for auth'd user
 
+### Metrics
+
+- [x] Community Profile Metrics
+- [x] Repository Clones data
+
 ### Billing
 
 - [x] Get action billing by org
