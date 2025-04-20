@@ -2337,8 +2337,14 @@ gh_client_response_t*
 gh_client_code_of_conduct_get_by_key(const char *key)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (key == NULL) {
+        response->err_msg = calloc(16, sizeof(char));
+        strcpy(response->err_msg, "key arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
