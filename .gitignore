@@ -3,7 +3,7 @@
 *.dynlib
 
 .vscode/*
-
+*.dSYM/
 bin/*
 tests/tests
 example
