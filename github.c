@@ -314,8 +314,19 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
 {
     gh_client_response_t *response = gh_client_response_new();
     
-    struct curl_slist *chunk = NULL;
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
 
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -359,9 +370,20 @@ gh_client_response_t*
 gh_client_repo_releases_latest(const char *owner, const char *repo)
 {
     gh_client_response_t *response = gh_client_response_new();
+
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
-
-
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -387,11 +409,23 @@ gh_client_repo_releases_latest(const char *owner, const char *repo)
 
 gh_client_response_t*
 gh_client_repo_release_by_tag(const char *owner, const char *repo,
-                            const char *tag)
+                              const char *tag)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -417,11 +451,23 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_by_id(const char *owner, const char *repo,
-                            const unsigned int id)
+                             const unsigned int id)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -451,11 +497,23 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_create(const char *owner, const char *repo,
-                            const char *data)
+                              const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -483,11 +541,23 @@ gh_client_repo_release_create(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_update(const char *owner, const char *repo,
-                            const unsigned int id, const char *data)
+                              const unsigned int id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -519,11 +589,23 @@ gh_client_repo_release_update(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_delete(const char *owner, const char *repo,
-                            const unsigned int id)
+                              const unsigned int id)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -554,11 +636,23 @@ gh_client_repo_release_delete(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_gen_notes(const char *owner, const char *repo,
-                                const char *data)
+                                 const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -586,12 +680,24 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_assets_list(const char *owner, const char *repo,
-                                const unsigned int id,
-                                const gh_client_req_list_opts_t *opts)
+                                   const unsigned int id,
+                                   const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -635,11 +741,23 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_release_asset_get(const char *owner, const char *repo,
-                                const unsigned int id)
+                                 const unsigned int id)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -673,8 +791,20 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
                             const gh_client_commits_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -743,12 +873,24 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_pr_commits_list(const char *owner, const char *repo,
-                            const char *sha,
-                            const gh_client_req_list_opts_t *opts)
+                               const char *sha,
+                               const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -790,11 +932,23 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_commit_get(const char *owner, const char *repo,
-                        const char *sha)
+                          const char *sha)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -822,11 +976,23 @@ gh_client_repo_commit_get(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_commits_compare(const char *owner, const char *repo,
-                            const char *base, const char *head)
+                               const char *base, const char *head)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -856,11 +1022,23 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_branches_list(const char *owner, const char *repo,
-                            const gh_client_req_list_opts_t *opts)
+                             const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -899,11 +1077,23 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_branch_get(const char *owner, const char *repo,
-                        const char *branch)
+                          const char *branch)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -930,11 +1120,23 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_branch_rename(const char *owner, const char *repo,
-                            const char *branch, const char *data)
+                             const char *branch, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -967,8 +1169,20 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
                                     const char *branch, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1001,8 +1215,20 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
                             const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1030,11 +1256,23 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_repo_pull_request_list(const char *owner, const char *repo,
-                                const gh_client_pull_req_opts_t *opts)
+                                 const gh_client_pull_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1101,8 +1339,20 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
                                 const gh_client_pull_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1168,8 +1418,14 @@ gh_client_response_t*
 gh_client_user_by_id_get(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (username == NULL) {
+        response->err_msg = calloc(21, sizeof(char));
+        strcpy(response->err_msg, "username arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1194,8 +1450,8 @@ gh_client_response_t*
 gh_client_user_by_id_hovercard_get(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1221,8 +1477,8 @@ gh_client_response_t*
 gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1259,8 +1515,8 @@ gh_client_response_t*
 gh_client_user_blocked_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1285,8 +1541,8 @@ gh_client_response_t*
 gh_client_user_block_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1312,8 +1568,8 @@ gh_client_response_t*
 gh_client_user_unblock_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1339,8 +1595,8 @@ gh_client_response_t*
 gh_client_user_followers_list(const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1372,8 +1628,8 @@ gh_client_response_t*
 gh_client_user_rate_limit_info()
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1396,8 +1652,8 @@ gh_client_response_t*
 gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1482,8 +1738,20 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
                             const gh_client_issues_req_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1586,8 +1854,20 @@ gh_client_response_t*
 gh_client_issue_create(const char *owner, const char *repo, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1617,8 +1897,20 @@ gh_client_issue_get(const char *owner, const char *repo,
                     const int unsigned id)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1650,8 +1942,20 @@ gh_client_issue_update(const char *owner, const char *repo,
                     const int unsigned id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1685,8 +1989,20 @@ gh_client_issue_lock(const char *owner, const char *repo,
                     const int unsigned id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1721,8 +2037,20 @@ gh_client_issue_unlock(const char *owner, const char *repo,
                     const int unsigned id)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1755,8 +2083,14 @@ gh_client_response_t*
 gh_client_actions_billing_by_org(const char *org)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (org == NULL) {
+        response->err_msg = calloc(16, sizeof(char));
+        strcpy(response->err_msg, "org arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1782,8 +2116,20 @@ gh_client_response_t*
 gh_client_metrics_community_profile(const char *owner, const char *repo)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
+    
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
 
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1811,6 +2157,18 @@ gh_client_metrics_repository_clones(const char *owner, const char *repo,
                                     const char *interval)
 {
     gh_client_response_t *response = gh_client_response_new();
+
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
 
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
@@ -1851,8 +2209,20 @@ gh_client_response_t*
 gh_client_metrics_top_referral_paths(const char *owner, const char *repo)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
@@ -1879,8 +2249,20 @@ gh_client_response_t*
 gh_client_metrics_top_referral_sources(const char *owner, const char *repo)
 {
     gh_client_response_t *response = gh_client_response_new();
-    struct curl_slist *chunk = NULL;
 
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
     chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
