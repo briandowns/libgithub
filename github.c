@@ -1451,6 +1451,12 @@ gh_client_user_by_id_hovercard_get(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
 
+    if (username == NULL) {
+        response->err_msg = calloc(21, sizeof(char));
+        strcpy(response->err_msg, "username arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -1516,6 +1522,12 @@ gh_client_user_blocked_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
 
+    if (username == NULL) {
+        response->err_msg = calloc(21, sizeof(char));
+        strcpy(response->err_msg, "username arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -1541,6 +1553,12 @@ gh_client_response_t*
 gh_client_user_block_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
+
+    if (username == NULL) {
+        response->err_msg = calloc(21, sizeof(char));
+        strcpy(response->err_msg, "username arg is NULL");
+        return response;
+    }
 
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
@@ -1568,6 +1586,12 @@ gh_client_response_t*
 gh_client_user_unblock_by_id(const char *username)
 {
     gh_client_response_t *response = gh_client_response_new();
+
+    if (username == NULL) {
+        response->err_msg = calloc(21, sizeof(char));
+        strcpy(response->err_msg, "username arg is NULL");
+        return response;
+    }
 
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
