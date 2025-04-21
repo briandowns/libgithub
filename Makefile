@@ -63,4 +63,4 @@ clean:
 
 .PHONY: example
 example: clean
-	$(CC) -o $@ github.c example.c $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ github.c example.c $(LDFLAGS)
