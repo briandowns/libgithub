@@ -2310,6 +2310,59 @@ gh_client_metrics_top_referral_sources(const char *owner, const char *repo)
 }
 
 gh_client_response_t*
+gh_client_metrics_page_views(const char *owner, const char *repo,
+                             const char *interval)
+{
+    gh_client_response_t *response = gh_client_response_new();
+
+    if (owner == NULL) {
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+    strcat(url, "/traffic/views");
+
+    if (strcmp(interval, "day") != 0) {
+        if (strcmp(interval, "week") != 0) {
+            response->err_msg = calloc(17, sizeof(char));
+            strcpy(response->err_msg, "invalid interval");
+            curl_slist_free_all(chunk);
+            return response;
+        }
+
+        strcat(url, "?per=");
+        strcat(url, interval);
+    }
+
+    SET_BASIC_CURL_CONFIG;
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    curl_slist_free_all(chunk);
+
+    return response;
+}
+
+gh_client_response_t*
 gh_client_codes_of_conduct_list()
 {
     gh_client_response_t *response = gh_client_response_new();

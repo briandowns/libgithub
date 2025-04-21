@@ -125,6 +125,7 @@ make example
 - [x] Repository Clones data
 - [x] Top 10 referral paths
 - [x] Top referral sources
+- [x] Number of page views 
 
 ### Billing
 

@@ -578,6 +578,14 @@ gh_client_response_t*
 gh_client_metrics_top_referral_sources(const char *owner, const char *repo);
 
 /**
+ * Retrieve total number of page views and breakdown per day or week for the
+ * last 14 days. Valid values for interval are: "day", "week".
+ */
+gh_client_response_t*
+gh_client_metrics_page_views(const char *owner, const char *repo,
+                             const char *interval);
+
+/**
  * Retrieve all codes of conduct. The response memory needs to be freed by the
  * caller.
  */
