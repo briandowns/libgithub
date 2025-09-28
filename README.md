@@ -53,6 +53,11 @@ make example
 * Each response from the API includes rate limit data.
 
 ### Repositories
+
+#### Info
+
+- [x] General repo info
+
 #### Branches
 
 - [x] List branches

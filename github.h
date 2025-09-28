@@ -104,7 +104,7 @@ enum gh_item_list_order {
 };
 
 /**
- * gh_issue_filters
+ * gh_issue_filters are used to filter out issues.
  */
 enum gh_issue_filters {
     GH_ISSUE_FILTER_ASSIGNED   = 0, // default
@@ -116,7 +116,8 @@ enum gh_issue_filters {
 };
 
 /**
- * gh_issue_sort_options
+ * gh_issue_sort_options are used to select the ordering of the returned
+ * issues.
  */
 enum gh_issue_sort_options {
     GH_ISSUE_SORT_CREATED  = 0, // default
@@ -213,6 +214,13 @@ gh_client_response_free(gh_client_response_t *res);
  */
 gh_client_response_t*
 gh_client_octocat_says();
+
+/**
+ * Retrieves the details for the given repository.
+ */
+gh_client_response_t*
+gh_client_repo_get(const char *owner, const char *repo,
+                           const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve a list of releases for the given repository. The response memory
