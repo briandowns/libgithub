@@ -216,19 +216,51 @@ gh_client_response_t*
 gh_client_octocat_says();
 
 /**
+ * Retrieve a list of repos for the given organization. The response memory
+ * needs to be freed by the caller. 
+ */
+gh_client_response_t*
+gh_client_repo_list_by_org_name(const char *owner,
+                                const gh_client_req_list_opts_t *opts);
+
+/**
  * Retrieves the details for the given repository.
  */
 gh_client_response_t*
 gh_client_repo_get(const char *owner, const char *repo,
-                           const gh_client_req_list_opts_t *opts);
+                   const gh_client_req_list_opts_t *opts);
 
+/**
+ * Create new repository in the given organization (owner).
+ */
+gh_client_response_t*
+gh_client_repo_create(const char *owner, const char *repo, const char *data);
+
+/**
+ * Update a repository with the given data. The response memory needs to be
+ * freed by the caller.
+ * 
+ * data argument must be JSON in the following format:
+ * 
+ * {"name":"Hello-World","description":"This is your first repository",
+ *  "homepage":"https://github.com","private":true,"has_issues":true,
+ *  "has_projects":true,"has_wiki":true}
+ */
+gh_client_response_t*
+gh_client_repo_update(const char *owner, const char *repo, const char *data);
+
+/**
+ * Delete a repository. The response memory needs to be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_delete(const char *owner, const char *repo);
 /**
  * Retrieve a list of releases for the given repository. The response memory
  * needs to be freed by the caller. 
  */
 gh_client_response_t*
 gh_client_repo_releases_list(const char *owner, const char *repo,
-                            const gh_client_req_list_opts_t *opts);
+                             const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve the latest release for the given repository. The response memory
@@ -243,7 +275,7 @@ gh_client_repo_releases_latest(const char *owner, const char *repo);
  */
 gh_client_response_t*
 gh_client_repo_release_by_tag(const char *owner, const char *repo,
-                            const char *tag);
+                              const char *tag);
 
 /**
  * Retrieve a release by the given id. The response memory needs to be freed by
@@ -251,7 +283,7 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_by_id(const char *owner, const char *repo,
-                            const unsigned int id);
+                             const unsigned int id);
 
 /**
  * Create a new release for the given repository and configuration. The
@@ -259,7 +291,7 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_create(const char *owner, const char *repo,
-                            const char *data);
+                              const char *data);
 
 /**
  * Update a release for the given repository and configuration. The response
@@ -272,7 +304,7 @@ gh_client_repo_release_create(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_update(const char *owner, const char *repo,
-                            const unsigned int id, const char *data);
+                              const unsigned int id, const char *data);
 
 /**
  * Delete a release for the given repository and configuration. The response
@@ -280,7 +312,7 @@ gh_client_repo_release_update(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_delete(const char *owner, const char *repo,
-                            const unsigned int id);
+                              const unsigned int id);
 
 /**
  * Generate release notes content for a release. The response memory needs to
@@ -295,7 +327,7 @@ gh_client_repo_release_delete(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_gen_notes(const char *owner, const char *repo,
-                                const char *data);
+                                 const char *data);
 
 /**
  * List the assets on a release with the given. The response memory needs to be
@@ -303,8 +335,8 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_assets_list(const char *owner, const char *repo,
-                                const unsigned int id,
-                                const gh_client_req_list_opts_t *opts);
+                                   const unsigned int id,
+                                   const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve a release asset for th given id. The response memory needs to be
@@ -312,7 +344,7 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_release_asset_get(const char *owner, const char *repo,
-                                const unsigned int id);
+                                 const unsigned int id);
 
 /**
  * Retrieve commits for a given repository. The response memory needs to be
@@ -328,14 +360,14 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_commit_get(const char *owner, const char *repo,
-                        const char *sha);
+                          const char *sha);
 
 /**
  * Compare 2 commits. The response memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_repo_commits_compare(const char *owner, const char *repo,
-                            const char *base, const char *head);
+                               const char *base, const char *head);
 
 /**
  * Retrieve the merged pull request that introduced the commit. The response
@@ -343,8 +375,8 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_pr_commits_list(const char *owner, const char *repo,
-                            const char *sha,
-                            const gh_client_req_list_opts_t *opts);
+                               const char *sha,
+                               const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve a list of branches for the given repository in JSON format. The
@@ -352,7 +384,7 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_branches_list(const char *owner, const char *repo,
-                            const gh_client_req_list_opts_t *opts);
+                             const gh_client_req_list_opts_t *opts);
 
 /**
  * Retrieve the given branch. The response memory needs to be freed by the
@@ -360,7 +392,7 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_branch_get(const char *owner, const char *repo,
-                        const char *branch);
+                          const char *branch);
 
 /**
  * Rename the given branch. The response memory needs to be freed by the
@@ -371,7 +403,7 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_branch_rename(const char *owner, const char *repo,
-                            const char *branch, const char *data);
+                             const char *branch, const char *data);
 
 /**
  * Sync the given branch in a fork to the given upstream. The response memory
@@ -401,7 +433,7 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_repo_pull_request_list(const char *owner, const char *repo,
-                                const gh_client_pull_req_opts_t *opts);
+                                 const gh_client_pull_req_opts_t *opts);
 
 /**
  * Retrieve 1 pull request by id. order option in opts will be ignored. The
@@ -490,7 +522,7 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts);
  */
 gh_client_response_t*
 gh_client_issues_by_repo_list(const char *owner, const char *repo,
-                            const gh_client_issues_req_opts_t *opts);
+                              const gh_client_issues_req_opts_t *opts);
 
 /**
  * Create an issue. The response memory needs to be freed by the caller.
@@ -524,7 +556,7 @@ gh_client_issue_get(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_update(const char *owner, const char *repo,
-                    const int unsigned id, const char *data);
+                       const int unsigned id, const char *data);
 
 /**
  * Lock an issue. The response memory needs to be freed by the caller.
@@ -539,7 +571,7 @@ gh_client_issue_update(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
-                    const int unsigned id, const char *data);
+                     const int unsigned id, const char *data);
 
 /**
  * Unlock an issue. The response memory needs to be freed by the caller.
@@ -550,7 +582,7 @@ gh_client_issue_lock(const char *owner, const char *repo,
  */
 gh_client_response_t*
 gh_client_issue_unlock(const char *owner, const char *repo,
-                    const int unsigned id);
+                       const int unsigned id);
 
 /**
  * Retrieve the action billing information for the given organization. The
