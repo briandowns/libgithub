@@ -59,7 +59,7 @@ make example
 - [x] Retrieve a repository
 - [x] Create repository
 - [x] Update repository
-- [ ] Delete repository
+- [x] Delete repository
 
 #### Branches
 
