@@ -254,6 +254,7 @@ gh_client_repo_update(const char *owner, const char *repo, const char *data);
  */
 gh_client_response_t*
 gh_client_repo_delete(const char *owner, const char *repo);
+
 /**
  * Retrieve a list of releases for the given repository. The response memory
  * needs to be freed by the caller. 
@@ -345,6 +346,14 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
 gh_client_response_t*
 gh_client_repo_release_asset_get(const char *owner, const char *repo,
                                  const unsigned int id);
+
+/**
+ * Retrieve stargazers for a given repository. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_repo_stargasers_list(const char *owner, const char *repo,
+                               const gh_client_commits_list_opts_t *opts);
 
 /**
  * Retrieve commits for a given repository. The response memory needs to be
