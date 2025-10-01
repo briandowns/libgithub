@@ -52,15 +52,14 @@ make example
 * List calls support pagination.
 * Each response from the API includes rate limit data.
 
-### Organizations
+
+### Repositories
 
 - [x] List repositories
 - [x] Retrieve a repository
 - [x] Create repository
 - [x] Update repository
 - [ ] Delete repository
-
-### Repositories
 
 #### Branches
 
