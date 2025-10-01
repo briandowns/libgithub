@@ -106,6 +106,10 @@ make example
 - [ ] Delete a release asset
 - [ ] Upload a release asset
 
+#### Stargazers
+
+- [x] List stargazers
+
 ### Issues
 
 - [x] List issues assigned to logged in user

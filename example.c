@@ -17,8 +17,7 @@ main(void)
         return 1;
     }
     gh_client_init(token);
-
-    gh_client_response_t *res = gh_client_repo_list_by_org_name("rancher", NULL);
+    gh_client_response_t *res = gh_client_repo_stargasers_list("briandowns", "jail", NULL);
     if (res->err_msg != NULL) {
         printf("%s\n", res->err_msg);
         gh_client_response_free(res);
@@ -27,6 +26,12 @@ main(void)
     if (res->resp != NULL) {
         printf("%s\n", res->resp);
     }
+    // gh_client_response_t *res = gh_client_repo_list_by_org_name("rancher", NULL);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
 
     // gh_client_response_t *res = gh_client_repo_get("rancher", "rke2", NULL);
     // if (res->err_msg != NULL) {
