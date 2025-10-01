@@ -363,14 +363,20 @@ gh_client_repo_create(const char *owner, const char *repo, const char *data)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(26, sizeof(char));
+        response->err_msg = calloc(25, sizeof(char));
         strcpy(response->err_msg, "error: owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
+        response->err_msg = calloc(24, sizeof(char));
         strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
         return response;
     }
 
@@ -397,6 +403,53 @@ gh_client_repo_create(const char *owner, const char *repo, const char *data)
     curl_slist_free_all(chunk);
 
     return response;    
+}
+
+gh_client_response_t*
+gh_client_repo_update(const char *owner, const char *repo, const char *data)
+{
+    gh_client_response_t *response = gh_client_response_new();
+
+    if (owner == NULL) {
+        response->err_msg = calloc(26, sizeof(char));
+        strcpy(response->err_msg, "error: owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(25, sizeof(char));
+        strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char url[DEFAULT_URL_SIZE] = GH_API_REPO_URL;
+    strcat(url, owner);
+    strcat(url, "/");
+    strcat(url, repo);
+
+    SET_BASIC_CURL_CONFIG;
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+
+    CURL_CALL_ERROR_CHECK;
+    curl_slist_free_all(chunk);
+
+    return response; 
 }
 
 gh_client_response_t*
@@ -657,6 +710,12 @@ gh_client_repo_release_create(const char *owner, const char *repo,
         return response;
     }
 
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -697,6 +756,12 @@ gh_client_repo_release_update(const char *owner, const char *repo,
     if (repo == NULL) {
         response->err_msg = calloc(25, sizeof(char));
         strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
         return response;
     }
 
@@ -790,6 +855,12 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
     if (repo == NULL) {
         response->err_msg = calloc(25, sizeof(char));
         strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
         return response;
     }
 
@@ -1272,6 +1343,12 @@ gh_client_repo_branch_rename(const char *owner, const char *repo,
         return response;
     }
 
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -1317,6 +1394,12 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
         return response;
     }
 
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -1359,6 +1442,12 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
     if (repo == NULL) {
         response->err_msg = calloc(25, sizeof(char));
         strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
         return response;
     }
 
@@ -2017,6 +2106,12 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data)
         return response;
     }
 
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -2105,6 +2200,12 @@ gh_client_issue_update(const char *owner, const char *repo,
         return response;
     }
 
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
+        return response;
+    }
+
     struct curl_slist *chunk = NULL;
     chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
     chunk = curl_slist_append(chunk, token_header);
@@ -2136,7 +2237,7 @@ gh_client_issue_update(const char *owner, const char *repo,
 
 gh_client_response_t*
 gh_client_issue_lock(const char *owner, const char *repo,
-                    const int unsigned id, const char *data)
+                     const int unsigned id, const char *data)
 {
     gh_client_response_t *response = gh_client_response_new();
 
@@ -2149,6 +2250,12 @@ gh_client_issue_lock(const char *owner, const char *repo,
     if (repo == NULL) {
         response->err_msg = calloc(25, sizeof(char));
         strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    if (data == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: data arg is NULL");
         return response;
     }
 

@@ -57,7 +57,7 @@ make example
 - [x] List repositories
 - [x] Retrieve a repository
 - [x] Create repository
-- [ ] Update repository
+- [x] Update repository
 - [ ] Delete repository
 
 ### Repositories
