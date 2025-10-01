@@ -250,7 +250,7 @@ gh_client_response_t*
 gh_client_repo_update(const char *owner, const char *repo, const char *data);
 
 /**
- * Delete a repsitory. The response memory needs to be freed by the caller.
+ * Delete a repository. The response memory needs to be freed by the caller.
  */
 gh_client_response_t*
 gh_client_repo_delete(const char *owner, const char *repo);
