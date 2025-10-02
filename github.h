@@ -594,6 +594,22 @@ gh_client_issue_unlock(const char *owner, const char *repo,
                        const int unsigned id);
 
 /**
+ * List events for the given organization. The response memory needs to be
+ * freed by the caller.
+ */
+gh_client_response_t*
+gh_client_events_by_org_list(const char *owner,
+                             const gh_client_issues_req_opts_t *opts);
+
+/**
+ * List events for the given user. The response memory needs to be freed by the
+ * caller.
+ */
+gh_client_response_t*
+gh_client_events_by_user_list(const char *user,
+                              const gh_client_issues_req_opts_t *opts);
+
+/**
  * Retrieve the action billing information for the given organization. The
  * response memory needs to be freed by the caller.
  */
