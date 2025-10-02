@@ -131,6 +131,7 @@ make example
 - [x] Unblock a user
 - [x] List followers
 - [x] Get rate limit info for auth'd user
+- [x] List starred repositories
 
 ### Metrics
 

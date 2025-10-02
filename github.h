@@ -527,6 +527,14 @@ gh_client_response_t*
 gh_client_user_rate_limit_info();
 
 /**
+ * Retrieve the list of stars for the given user. The response memory needs to
+ * be freed by the caller.
+ */
+gh_client_response_t*
+gh_client_user_stars_list(const char *USER,
+                          const gh_client_req_list_opts_t *opts);
+
+/**
  * List issues for the logged in user. The response memory needs to be freed by
  * the caller.
  */
