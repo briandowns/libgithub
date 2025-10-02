@@ -137,7 +137,12 @@ make example
 - [x] Repository Clones data
 - [x] Top 10 referral paths
 - [x] Top referral sources
-- [x] Number of page views 
+- [x] Number of page views
+
+### Activity
+
+- [x] List events by organization
+- [x] List events by user
 
 ### Billing
 
