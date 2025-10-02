@@ -132,6 +132,7 @@ make example
 - [x] List followers
 - [x] Get rate limit info for auth'd user
 - [x] List starred repositories
+- [x] List user repositories
 
 ### Metrics
 
