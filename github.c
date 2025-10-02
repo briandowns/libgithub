@@ -509,6 +509,63 @@ gh_client_repo_update(const char *owner, const char *repo, const char *data)
 }
 
 gh_client_response_t*
+gh_client_repo_languages_list(const char *owner, const char *repo,
+                              const gh_client_req_list_opts_t *opts)
+{
+    gh_client_response_t *response = gh_client_response_new();
+    
+    if (owner == NULL) {
+        response->err_msg = calloc(25, sizeof(char));
+        strcpy(response->err_msg, "error: owner arg is NULL");
+        return response;
+    }
+
+    if (repo == NULL) {
+        response->err_msg = calloc(24, sizeof(char));
+        strcpy(response->err_msg, "error: repo arg is NULL");
+        return response;
+    }
+
+    struct curl_slist *chunk = NULL;
+    chunk = curl_slist_append(chunk, GH_REQ_JSON_HEADER);
+    chunk = curl_slist_append(chunk, token_header);
+    chunk = curl_slist_append(chunk, GH_REQ_VER_HEADER);
+    chunk = curl_slist_append(chunk, GH_REQ_DEF_UA_HEADER);
+
+    char url[DEFAULT_URL_SIZE] = {0};
+
+    if (opts != NULL && opts->per_page > 30) {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/languages");
+
+        char pp_val[11] = {0};
+        sprintf(pp_val, "%d", opts->per_page);
+        strcat(url, pp_val);
+    } else if (opts != NULL && opts->page_url != NULL) {
+        strcpy(url, opts->page_url);
+    } else {
+        strcpy(url, GH_API_REPO_URL);
+        strcat(url, owner);
+        strcat(url, "/");
+        strcat(url, repo);
+        strcat(url, "/languages");
+    }
+
+    SET_BASIC_CURL_CONFIG;
+    
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response->resp_code);
+    CURL_CALL_ERROR_CHECK;
+
+    curl_slist_free_all(chunk);
+    
+    return response; 
+}
+
+gh_client_response_t*
 gh_client_repo_delete(const char *owner, const char *repo)
 {
     gh_client_response_t *response = gh_client_response_new();

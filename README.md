@@ -60,6 +60,7 @@ make example
 - [x] Create repository
 - [x] Update repository
 - [x] Delete repository
+- [x] List languages in repository
 
 #### Branches
 

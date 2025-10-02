@@ -256,6 +256,14 @@ gh_client_response_t*
 gh_client_repo_delete(const char *owner, const char *repo);
 
 /**
+ * Lists languages used in the given repository. The response memory
+ * needs to be freed by the caller. 
+ */
+gh_client_response_t*
+gh_client_repo_languages_list(const char *owner, const char *repo,
+                              const gh_client_req_list_opts_t *opts);
+
+/**
  * Retrieve a list of releases for the given repository. The response memory
  * needs to be freed by the caller. 
  */
