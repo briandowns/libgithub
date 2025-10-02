@@ -18,7 +18,7 @@ main(void)
     }
     gh_client_init(token);
 
-    gh_client_response_t *res = gh_client_events_by_user_list("briandowns", NULL);
+    gh_client_response_t *res = gh_client_repo_languages_list("briandowns", "sky-island", NULL);
     if (res->err_msg != NULL) {
         printf("%s\n", res->err_msg);
         gh_client_response_free(res);
@@ -27,6 +27,13 @@ main(void)
     if (res->resp != NULL) {
         printf("%s\n", res->resp);
     }
+
+    // gh_client_response_t *res = gh_client_events_by_user_list("briandowns", NULL);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
 
     // gh_client_response_t *res = gh_client_events_by_org_list("rancher", NULL);
     // if (res->err_msg != NULL) {
