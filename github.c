@@ -1184,7 +1184,7 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
         strcat(url, "/commits");
     }
 
-    if (opts != NULL) {
+    if (opts != NULL && opts->page_url == NULL) {
         int first_param_set = 0;
 
         if (opts->sha != NULL) {
@@ -2152,7 +2152,7 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
         strcpy(url, GH_API_ISSUES_URL);
     }
 
-    if (opts != NULL) {
+    if (opts != NULL && opts->page_url == NULL) {
         int first_param_set = 0;
 
         if (opts->labels != NULL) {
@@ -2254,7 +2254,7 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
         strcat(url, "/issues");
     }
 
-    if (opts != NULL) {
+    if (opts != NULL && opts->page_url == NULL) {
         int first_param_set = 0;
 
         if (opts->assignee != NULL) {
