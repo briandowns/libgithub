@@ -1,18 +1,21 @@
-cc = cc
+CC ?= cc
 
 NAME = libgithub
 
 UNAME_S = $(shell uname -s)
 
-CFLAGS  = -std=c17 -O3 -fPIC -Wall -Wextra
+CFLAGS += -std=c17 -O3 -fPIC -Wall -Wextra
+LDFLAGS += -lcurl
+
 ifeq ($(UNAME_S),FreeBSD)
 	CFLAGS += $(shell pkg-config --cflags --libs libcurl)
 endif
-LDFLAGS = -lcurl
 
-# respect traditional UNIX paths
-INCDIR  = /usr/local/include
-LIBDIR  = /usr/local/lib
+PREFIX ?= /usr
+DESTDIR ?=
+
+INCDIR = $(PREFIX)/include
+LIBDIR = $(PREFIX)/lib
 
 ifeq ($(UNAME_S),Darwin)
 $(NAME).dylib: clean
@@ -34,24 +37,25 @@ valgrind: tests
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --tool=memcheck ./tests/tests 2>&1 | awk -F':' '/definitely lost:/ {print $2}'
 
 .PHONY: install
-install: 
-	cp github.h $(INCDIR)
+install:
+	cp github.h $(DESTDIR)$(INCDIR)
 ifeq ($(UNAME_S),Linux)
-	cp github.h $(INCDIR)
-	cp $(NAME).so $(LIBDIR)
+	cp github.h $(DESTDIR)$(INCDIR)
+	cp $(NAME).so $(DESTDIR)$(LIBDIR)
 endif
 ifeq ($(UNAME_S),Darwin)
-	cp github.h $(INCDIR)
-	cp $(NAME).dylib $(LIBDIR)
+	cp github.h $(DESTDIR)$(INCDIR)
+	cp $(NAME).dylib $(DESTDIR)$(LIBDIR)
 endif
 
+.PHONY: uninstall
 uninstall:
-	rm -f $(INCDIR)/github.h
+	rm -f $(DESTDIR)$(INCDIR)/github.h
 ifeq ($(UNAME_S),Linux)
-	rm -f $(INCDIR)/$(NAME).so
+	rm -f $(DESTDIR)$(LIBDIR)/$(NAME).so
 endif
 ifeq ($(UNAME_S),Darwin)
-	rm -f $(INCDIR)/$(NAME).dylib
+	rm -f $(DESTDIR)$(LIBDIR)/$(NAME).dylib
 endif
 
 .PHONY: clean
