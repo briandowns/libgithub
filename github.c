@@ -48,9 +48,12 @@
 #define DEFAULT_URL_SIZE        2048
 #define DEFAULT_USER_AGENT_SIZE 255
 
+#define GH_MAX_LINK_HEADERS   4
+#define GH_PER_PAGE_THRESHOLD 30
+
 #define SET_BASIC_CURL_CONFIG                                  \
     curl_easy_reset(curl);                                     \
-    curl_easy_setopt(curl, CURLOPT_URL, &url);                 \
+    curl_easy_setopt(curl, CURLOPT_URL, url);                  \
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);        \
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);         \
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb); \
@@ -60,7 +63,7 @@
 
 #define CURL_CALL_ERROR_CHECK                                        \
     if (res != CURLE_OK) {                                           \
-        char *err_msg = (char *)curl_easy_strerror(res);             \
+        char *err_msg = (char*)curl_easy_strerror(res);              \
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char)); \
         strcpy(response->err_msg, err_msg);                          \
         curl_slist_free_all(chunk);                                  \
@@ -247,7 +250,10 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                 link_count++;
             }
 
-            link_t links[link_count];
+            link_t links[GH_MAX_LINK_HEADERS];
+            if (link_count > GH_MAX_LINK_HEADERS) {
+                link_count = GH_MAX_LINK_HEADERS;
+            }
             parse_link_header(value, links, link_count);
             
 
@@ -258,7 +264,7 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                 if (strstr(links[i].rel, "prev\"") != NULL) {
                     strcpy(response->prev_link, links[i].url);
                 }
-                if (strstr(links[i].rel, "next") != NULL) {
+                if (strstr(links[i].rel, "next\"") != NULL) {
                     strcpy(response->next_link, links[i].url);
                 }
 
@@ -357,14 +363,14 @@ gh_client_repo_list_by_org_name(const char *owner,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_ORGS_URL);
         strcat(url, "/");
         strcat(url, owner);
         strcat(url, "/repos");
 
         char pp_val[11] = {0};
-        sprintf(pp_val, "%d", opts->per_page);
+        sprintf(pp_val, "?per_page=%d", opts->per_page);
         strcat(url, pp_val);
     } else if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
@@ -412,7 +418,7 @@ gh_client_repo_get(const char *owner, const char *repo,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
         strcat(url, "/");
@@ -562,7 +568,7 @@ gh_client_repo_languages_list(const char *owner, const char *repo,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
         strcat(url, "/");
@@ -659,7 +665,7 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
         strcat(url, "/");
@@ -1057,7 +1063,7 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
         strcat(url, "/assets");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1158,7 +1164,7 @@ gh_client_repo_stargazers_list(const char *owner, const char *repo,
         strcat(url, "/stargazers");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1241,7 +1247,7 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
             first_param_set ? strcat(url, "&until="), strcat(url, opts->until):
                 strcat(url, "?until="), strcat(url, opts->until);
         }
-        if (opts->per_page > 30) {
+        if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
             char pp_val[11] = {0};
             first_param_set ? strcat(url, "&per_page="),
                 sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
@@ -1302,7 +1308,7 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
         strcat(url, "/pulls");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1445,7 +1451,7 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
         strcat(url, "/branches");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1709,7 +1715,7 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
                     strcat(url, "?direction=asc");
             }
     
-            if (opts->per_page > 30) {
+            if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
                 first_param_set ? strcat(url, "&per_page=") : strcat(url, "?per_page=");
     
                 char pp_val[11] = {0};
@@ -1898,7 +1904,7 @@ gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts)
         strcpy(url, GH_API_USER_URL "/blocks");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -2025,7 +2031,7 @@ gh_client_user_followers_list(const gh_client_req_list_opts_t *opts)
 
     char url[DEFAULT_URL_SIZE] = GH_API_USER_URL "/followers";
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -2088,7 +2094,7 @@ gh_client_user_stars_list(const char *user,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_USERS_URL);
         strcat(url, user);
         strcat(url, "/starred");
@@ -2135,7 +2141,7 @@ gh_client_user_repositories_list(const char *user,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_USERS_URL);
         strcat(url, user);
         strcat(url, "/repos");
@@ -2192,7 +2198,7 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
             first_param_set ? strcat(url, "&since="), strcat(url, opts->since):
                 strcat(url, "?since="), strcat(url, opts->since);
         }
-        if (opts->per_page > 30) {
+        if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
             char pp_val[11] = {0};
             first_param_set ? strcat(url, "&per_page="),
                 sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
@@ -2309,7 +2315,7 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
             first_param_set ? strcat(url, "&since="), strcat(url, opts->since):
                 strcat(url, "?since="), strcat(url, opts->since);
         }
-        if (opts->per_page > 30) {
+        if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
             char pp_val[11] = {0};
             first_param_set ? strcat(url, "&per_page="),
                 sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
@@ -2631,7 +2637,7 @@ gh_client_events_by_org_list(const char *owner,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_ORGS_URL);
         strcat(url, "/");
         strcat(url, owner);
@@ -2681,7 +2687,7 @@ gh_client_events_by_user_list(const char *user,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_USERS_URL);
         strcat(url, user);
         strcat(url, "/events/public");
