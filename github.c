@@ -369,7 +369,7 @@ gh_client_repo_list_by_org_name(const char *owner,
         strcat(url, owner);
         strcat(url, "/repos");
 
-        char pp_val[11] = {0};
+        char pp_val[21] = {0};
         sprintf(pp_val, "?per_page=%d", opts->per_page);
         strcat(url, pp_val);
     } else if (opts != NULL && opts->page_url != NULL) {
