@@ -25,22 +25,22 @@
  * SUCH DAMAGE.
  */
 
+#ifndef __CLIENT_H
+#define __CLIENT_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
-#ifndef __CLIENT_H
-#define __CLIENT_H
  
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/types.h>
- 
-#define GH_CLIENT_USER_BLOCKED_CODE     204
-#define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
 #define GH_CLIENT_PER_PAGE_MAX 100
+
+#define GH_CLIENT_USER_BLOCKED_CODE     204
+#define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
 #define GH_API_BASE_URL   "https://api.github.com"
 #define GH_API_ORGS_URL   GH_API_BASE_URL "/orgs"
@@ -73,7 +73,7 @@ typedef struct {
     char *resp;
     char *err_msg;
     size_t size;
-    uint16_t resp_code;
+    long resp_code;
 
     // pagination fields
     char first_link[GH_MAX_URL_LEN];
@@ -163,18 +163,6 @@ typedef struct {
     unsigned int per_page;
     char *page_url;
 } gh_client_req_list_opts_t;
-
-/**
- * Structure used to pass pagination settings.
- */
-typedef struct {
-    char *page_url;
-    unsigned int first;
-    unsigned int last;
-    char *after;
-    char *before;
-    char *cursor;
-} gh_client_req_list_cursor_opts_t;
 
 /**
  * Structure used to pass additional options when listing commits.
@@ -360,7 +348,7 @@ gh_client_repo_release_asset_get(const char *owner, const char *repo,
  * freed by the caller.
  */
 gh_client_response_t*
-gh_client_repo_stargasers_list(const char *owner, const char *repo,
+gh_client_repo_stargazers_list(const char *owner, const char *repo,
                                const gh_client_commits_list_opts_t *opts);
 
 /**
@@ -694,7 +682,7 @@ gh_client_code_of_conduct_get_by_key(const char *key);
 void
 gh_client_free();
 
-#endif /** end __CLIENT_H */
 #ifdef __cplusplus
 }
 #endif
+#endif /** end __CLIENT_H */

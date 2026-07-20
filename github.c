@@ -26,7 +26,6 @@
  */
 
 #define _DEFAULT_SOURCE
-#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,8 +47,12 @@
 #define DEFAULT_URL_SIZE        2048
 #define DEFAULT_USER_AGENT_SIZE 255
 
+#define GH_MAX_LINK_HEADERS   4
+#define GH_PER_PAGE_THRESHOLD 30
+
 #define SET_BASIC_CURL_CONFIG                                  \
-    curl_easy_setopt(curl, CURLOPT_URL, &url);                 \
+    curl_easy_reset(curl);                                     \
+    curl_easy_setopt(curl, CURLOPT_URL, url);                  \
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);        \
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);         \
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_cb); \
@@ -59,7 +62,7 @@
 
 #define CURL_CALL_ERROR_CHECK                                        \
     if (res != CURLE_OK) {                                           \
-        char *err_msg = (char *)curl_easy_strerror(res);             \
+        char *err_msg = (char*)curl_easy_strerror(res);              \
         response->err_msg = calloc(strlen(err_msg)+1, sizeof(char)); \
         strcpy(response->err_msg, err_msg);                          \
         curl_slist_free_all(chunk);                                  \
@@ -75,7 +78,7 @@ gh_client_init(const char *token)
 {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
-    if (!curl) {
+    if (curl == NULL) {
         return 1;
     }
 
@@ -90,6 +93,10 @@ gh_client_init(const char *token)
 void
 gh_client_set_user_agent(const char *ua)
 {
+    if (ua == NULL) {
+        return;
+    }
+
     memset(user_agent, 0, DEFAULT_USER_AGENT_SIZE);
     strcpy(user_agent, ua);
 }
@@ -128,7 +135,7 @@ cb(char *data, size_t size, size_t nmemb, void *clientp)
 
     if (res->resp == NULL) {
         res->resp = calloc(res->size + realsize+1, sizeof(char));
-    }else {
+    } else {
         char *ptr = realloc(res->resp, res->size + realsize+1);
         res->resp = ptr;
     }
@@ -152,7 +159,11 @@ static int
 parse_link_header(const char *header, link_t *links, int count)
 {
     int link_count = 0;
-    char *token = strtok((char *)header, ",");
+
+    char buf[GH_MAX_URL_LEN] = {0};
+    strncpy(buf, header, sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+    char *token = strtok(buf, ",");
 
     while (token != NULL && link_count < count) {
         char *url_start = strchr(token, '<');
@@ -179,6 +190,10 @@ parse_link_header(const char *header, link_t *links, int count)
 static inline uint64_t
 str_to_uint64(const char *str)
 {
+    if (str == NULL) {
+        return 0;
+    }
+
     char *endptr;
     uint64_t result = strtoull(str, &endptr, 10);
     if (*endptr != '\0') {
@@ -191,9 +206,13 @@ str_to_uint64(const char *str)
 /**
  * Process response header information.
  */
-size_t
+static size_t
 header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
 {
+    if (buffer == NULL || userdata == NULL) {
+        return 0;
+    }
+
     size_t total_size = size * nmemb;
     gh_client_response_t *response = (gh_client_response_t*)userdata;
 
@@ -230,7 +249,10 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                 link_count++;
             }
 
-            link_t links[link_count];
+            link_t links[GH_MAX_LINK_HEADERS];
+            if (link_count > GH_MAX_LINK_HEADERS) {
+                link_count = GH_MAX_LINK_HEADERS;
+            }
             parse_link_header(value, links, link_count);
             
 
@@ -241,7 +263,7 @@ header_cb(char *buffer, size_t size, size_t nmemb, void *userdata)
                 if (strstr(links[i].rel, "prev\"") != NULL) {
                     strcpy(response->prev_link, links[i].url);
                 }
-                if (strstr(links[i].rel, "next") != NULL) {
+                if (strstr(links[i].rel, "next\"") != NULL) {
                     strcpy(response->next_link, links[i].url);
                 }
 
@@ -262,7 +284,18 @@ static inline gh_client_response_t*
 gh_client_response_new()
 {
     gh_client_response_t *resp = calloc(1, sizeof(gh_client_response_t));
+    if (resp == NULL) {
+        return NULL;
+    }
     resp->rate_limit_data = calloc(1, sizeof(gh_client_rate_limit_data_t));
+    if (resp->rate_limit_data == NULL) {
+        free(resp);
+        return NULL;
+    }
+    resp->first_link[0] = '\0';
+    resp->next_link[0] = '\0';
+    resp->prev_link[0] = '\0';
+    resp->last_link[0] = '\0';
 
     return resp;
 }
@@ -316,8 +349,8 @@ gh_client_repo_list_by_org_name(const char *owner,
     gh_client_response_t *response = gh_client_response_new();
     
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
@@ -329,14 +362,14 @@ gh_client_repo_list_by_org_name(const char *owner,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_ORGS_URL);
         strcat(url, "/");
         strcat(url, owner);
         strcat(url, "/repos");
 
-        char pp_val[11] = {0};
-        sprintf(pp_val, "%d", opts->per_page);
+        char pp_val[21] = {0};
+        sprintf(pp_val, "?per_page=%d", opts->per_page);
         strcat(url, pp_val);
     } else if (opts != NULL && opts->page_url != NULL) {
         strcpy(url, opts->page_url);
@@ -360,19 +393,19 @@ gh_client_repo_list_by_org_name(const char *owner,
 
 gh_client_response_t*
 gh_client_repo_get(const char *owner, const char *repo,
-                           const gh_client_req_list_opts_t *opts)
+                   const gh_client_req_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
     
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -384,7 +417,7 @@ gh_client_repo_get(const char *owner, const char *repo,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
         strcat(url, "/");
@@ -419,20 +452,20 @@ gh_client_repo_create(const char *owner, const char *repo, const char *data)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -467,20 +500,20 @@ gh_client_repo_update(const char *owner, const char *repo, const char *data)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -515,14 +548,14 @@ gh_client_repo_languages_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
     
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -534,7 +567,7 @@ gh_client_repo_languages_list(const char *owner, const char *repo,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
         strcat(url, "/");
@@ -571,14 +604,14 @@ gh_client_repo_delete(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -612,14 +645,14 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
     
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -631,7 +664,7 @@ gh_client_repo_releases_list(const char *owner, const char *repo,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_REPO_URL);
         strcat(url, owner);
         strcat(url, "/");
@@ -669,14 +702,14 @@ gh_client_repo_releases_latest(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -710,14 +743,14 @@ gh_client_repo_release_by_tag(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -752,14 +785,14 @@ gh_client_repo_release_by_id(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -797,20 +830,20 @@ gh_client_repo_release_create(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -846,20 +879,20 @@ gh_client_repo_release_update(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -899,14 +932,14 @@ gh_client_repo_release_delete(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -945,20 +978,20 @@ gh_client_repo_release_gen_notes(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -995,14 +1028,14 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1029,7 +1062,7 @@ gh_client_repo_release_assets_list(const char *owner, const char *repo,
         strcat(url, "/assets");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1055,14 +1088,14 @@ gh_client_repo_release_asset_get(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1095,20 +1128,20 @@ gh_client_repo_release_asset_get(const char *owner, const char *repo,
 }
 
 gh_client_response_t*
-gh_client_repo_stargasers_list(const char *owner, const char *repo,
+gh_client_repo_stargazers_list(const char *owner, const char *repo,
                                const gh_client_commits_list_opts_t *opts)
 {
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1130,7 +1163,7 @@ gh_client_repo_stargasers_list(const char *owner, const char *repo,
         strcat(url, "/stargazers");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1156,14 +1189,14 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1213,7 +1246,7 @@ gh_client_repo_commits_list(const char *owner, const char *repo,
             first_param_set ? strcat(url, "&until="), strcat(url, opts->until):
                 strcat(url, "?until="), strcat(url, opts->until);
         }
-        if (opts->per_page > 30) {
+        if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
             char pp_val[11] = {0};
             first_param_set ? strcat(url, "&per_page="),
                 sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
@@ -1242,14 +1275,14 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1274,7 +1307,7 @@ gh_client_repo_pr_commits_list(const char *owner, const char *repo,
         strcat(url, "/pulls");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1300,14 +1333,14 @@ gh_client_repo_commit_get(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1343,14 +1376,14 @@ gh_client_repo_commits_compare(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1388,14 +1421,14 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1417,7 +1450,7 @@ gh_client_repo_branches_list(const char *owner, const char *repo,
         strcat(url, "/branches");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1443,14 +1476,14 @@ gh_client_repo_branch_get(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1485,20 +1518,20 @@ gh_client_repo_branch_rename(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -1536,20 +1569,20 @@ gh_client_repo_branch_sync_upstream(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -1587,20 +1620,20 @@ gh_client_repo_branch_merge(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -1636,14 +1669,14 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1681,7 +1714,7 @@ gh_client_repo_pull_request_list(const char *owner, const char *repo,
                     strcat(url, "?direction=asc");
             }
     
-            if (opts->per_page > 30) {
+            if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
                 first_param_set ? strcat(url, "&per_page=") : strcat(url, "?per_page=");
     
                 char pp_val[11] = {0};
@@ -1716,14 +1749,14 @@ gh_client_repo_pull_request_get(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -1795,7 +1828,7 @@ gh_client_user_by_id_get(const char *username)
 
     if (username == NULL) {
         response->err_msg = calloc(28, sizeof(char));
-        strcpy(response->err_msg, "error: username arg is NULL");
+        strcpy(response->err_msg, "username arg is NULL");
         return response;
     }
 
@@ -1826,7 +1859,7 @@ gh_client_user_by_id_hovercard_get(const char *username)
 
     if (username == NULL) {
         response->err_msg = calloc(28, sizeof(char));
-        strcpy(response->err_msg, "error: username arg is NULL");
+        strcpy(response->err_msg, "username arg is NULL");
         return response;
     }
 
@@ -1870,7 +1903,7 @@ gh_client_user_blocked_list(const gh_client_req_list_opts_t *opts)
         strcpy(url, GH_API_USER_URL "/blocks");
     }
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -1896,7 +1929,7 @@ gh_client_user_blocked_by_id(const char *username)
 
     if (username == NULL) {
         response->err_msg = calloc(28, sizeof(char));
-        strcpy(response->err_msg, "error: username arg is NULL");
+        strcpy(response->err_msg, "username arg is NULL");
         return response;
     }
 
@@ -1927,7 +1960,7 @@ gh_client_user_block_by_id(const char *username)
 
     if (username == NULL) {
         response->err_msg = calloc(28, sizeof(char));
-        strcpy(response->err_msg, "error: username arg is NULL");
+        strcpy(response->err_msg, "username arg is NULL");
         return response;
     }
 
@@ -1959,7 +1992,7 @@ gh_client_user_unblock_by_id(const char *username)
 
     if (username == NULL) {
         response->err_msg = calloc(28, sizeof(char));
-        strcpy(response->err_msg, "error: username arg is NULL");
+        strcpy(response->err_msg, "username arg is NULL");
         return response;
     }
 
@@ -1997,7 +2030,7 @@ gh_client_user_followers_list(const gh_client_req_list_opts_t *opts)
 
     char url[DEFAULT_URL_SIZE] = GH_API_USER_URL "/followers";
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcat(url, "?per_page=");
 
         char pp_val[11] = {0};
@@ -2047,8 +2080,8 @@ gh_client_user_stars_list(const char *user,
     gh_client_response_t *response = gh_client_response_new();
     
     if (user == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "user arg is NULL");
         return response;
     }
 
@@ -2060,7 +2093,7 @@ gh_client_user_stars_list(const char *user,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_USERS_URL);
         strcat(url, user);
         strcat(url, "/starred");
@@ -2094,8 +2127,8 @@ gh_client_user_repositories_list(const char *user,
     gh_client_response_t *response = gh_client_response_new();
     
     if (user == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "user arg is NULL");
         return response;
     }
 
@@ -2107,7 +2140,7 @@ gh_client_user_repositories_list(const char *user,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_USERS_URL);
         strcat(url, user);
         strcat(url, "/repos");
@@ -2164,7 +2197,7 @@ gh_client_issues_for_user_list(const gh_client_issues_req_opts_t *opts)
             first_param_set ? strcat(url, "&since="), strcat(url, opts->since):
                 strcat(url, "?since="), strcat(url, opts->since);
         }
-        if (opts->per_page > 30) {
+        if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
             char pp_val[11] = {0};
             first_param_set ? strcat(url, "&per_page="),
                 sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
@@ -2226,14 +2259,14 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2281,7 +2314,7 @@ gh_client_issues_by_repo_list(const char *owner, const char *repo,
             first_param_set ? strcat(url, "&since="), strcat(url, opts->since):
                 strcat(url, "?since="), strcat(url, opts->since);
         }
-        if (opts->per_page > 30) {
+        if (opts->per_page > GH_PER_PAGE_THRESHOLD) {
             char pp_val[11] = {0};
             first_param_set ? strcat(url, "&per_page="),
                 sprintf(pp_val, "%d", opts->per_page), strcat(url, pp_val):
@@ -2342,20 +2375,20 @@ gh_client_issue_create(const char *owner, const char *repo, const char *data)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -2391,14 +2424,14 @@ gh_client_issue_get(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2436,20 +2469,20 @@ gh_client_issue_update(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -2489,20 +2522,20 @@ gh_client_issue_lock(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
     if (data == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: data arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "data arg is NULL");
         return response;
     }
 
@@ -2543,14 +2576,14 @@ gh_client_issue_unlock(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2590,8 +2623,8 @@ gh_client_events_by_org_list(const char *owner,
     gh_client_response_t *response = gh_client_response_new();
     
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
@@ -2603,7 +2636,7 @@ gh_client_events_by_org_list(const char *owner,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_ORGS_URL);
         strcat(url, "/");
         strcat(url, owner);
@@ -2640,8 +2673,8 @@ gh_client_events_by_user_list(const char *user,
     gh_client_response_t *response = gh_client_response_new();
     
     if (user == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: user arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "user arg is NULL");
         return response;
     }
 
@@ -2653,7 +2686,7 @@ gh_client_events_by_user_list(const char *user,
 
     char url[DEFAULT_URL_SIZE] = {0};
 
-    if (opts != NULL && opts->per_page > 30) {
+    if (opts != NULL && opts->per_page > GH_PER_PAGE_THRESHOLD) {
         strcpy(url, GH_API_USERS_URL);
         strcat(url, user);
         strcat(url, "/events/public");
@@ -2687,8 +2720,8 @@ gh_client_actions_billing_by_org(const char *org)
     gh_client_response_t *response = gh_client_response_new();
 
     if (org == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: org arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "org arg is NULL");
         return response;
     }
 
@@ -2719,14 +2752,14 @@ gh_client_metrics_community_profile(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
     
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2760,14 +2793,14 @@ gh_client_metrics_repository_clones(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2812,14 +2845,14 @@ gh_client_metrics_top_referral_paths(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2852,14 +2885,14 @@ gh_client_metrics_top_referral_sources(const char *owner, const char *repo)
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2893,14 +2926,14 @@ gh_client_metrics_page_views(const char *owner, const char *repo,
     gh_client_response_t *response = gh_client_response_new();
 
     if (owner == NULL) {
-        response->err_msg = calloc(25, sizeof(char));
-        strcpy(response->err_msg, "error: owner arg is NULL");
+        response->err_msg = calloc(18, sizeof(char));
+        strcpy(response->err_msg, "owner arg is NULL");
         return response;
     }
 
     if (repo == NULL) {
-        response->err_msg = calloc(24, sizeof(char));
-        strcpy(response->err_msg, "error: repo arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "repo arg is NULL");
         return response;
     }
 
@@ -2970,7 +3003,7 @@ gh_client_code_of_conduct_get_by_key(const char *key)
 
     if (key == NULL) {
         response->err_msg = calloc(23, sizeof(char));
-        strcpy(response->err_msg, "error: key arg is NULL");
+        strcpy(response->err_msg, "key arg is NULL");
         return response;
     }
 
