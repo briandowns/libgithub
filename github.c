@@ -26,7 +26,6 @@
  */
 
 #define _DEFAULT_SOURCE
-#include <ctype.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -2128,8 +2127,8 @@ gh_client_user_repositories_list(const char *user,
     gh_client_response_t *response = gh_client_response_new();
     
     if (user == NULL) {
-        response->err_msg = calloc(18, sizeof(char));
-        strcpy(response->err_msg, "owner arg is NULL");
+        response->err_msg = calloc(17, sizeof(char));
+        strcpy(response->err_msg, "user arg is NULL");
         return response;
     }
 

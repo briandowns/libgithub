@@ -36,7 +36,9 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/types.h>
- 
+
+#define GH_CLIENT_PER_PAGE_MAX 100
+
 #define GH_CLIENT_USER_BLOCKED_CODE     204
 #define GH_CLIENT_USER_NOT_BLOCKED_CODE 404
 
