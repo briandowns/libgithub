@@ -73,7 +73,7 @@ typedef struct {
     char *resp;
     char *err_msg;
     size_t size;
-    uint16_t resp_code;
+    long resp_code;
 
     // pagination fields
     char first_link[GH_MAX_URL_LEN];

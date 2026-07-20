@@ -1,10 +1,10 @@
-cc = cc
+CC = clang
 
 NAME = libgithub
 
 UNAME_S = $(shell uname -s)
 
-CFLAGS  = -std=c17 -O3 -fPIC -Wall -Wextra
+CFLAGS  = -std=c2x -O2 -fPIC -Wall -Wextra
 ifeq ($(UNAME_S),FreeBSD)
 	CFLAGS += $(shell pkg-config --cflags --libs libcurl)
 endif
