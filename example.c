@@ -18,15 +18,15 @@ main(void)
     }
     gh_client_init(token);
 
-    gh_client_response_t *res = gh_client_user_repositories_list("briandowns", NULL);
-    if (res->err_msg != NULL) {
-        printf("%s\n", res->err_msg);
-        gh_client_response_free(res);
-        return 1;
-    }
-    if (res->resp != NULL) {
-        printf("%s\n", res->resp);
-    }
+    // gh_client_response_t *res = gh_client_user_repositories_list("briandowns", NULL);
+    // if (res->err_msg != NULL) {
+    //     printf("%s\n", res->err_msg);
+    //     gh_client_response_free(res);
+    //     return 1;
+    // }
+    // if (res->resp != NULL) {
+    //     printf("%s\n", res->resp);
+    // }
 
     // gh_client_response_t *res = gh_client_user_stars_list("briandowns", NULL);
     // if (res->err_msg != NULL) {
@@ -492,14 +492,14 @@ main(void)
     // printf("%s\n", res->resp);
     // gh_client_response_free(res);
 
-    // gh_client_response_t *res = gh_client_metrics_page_views("briandowns", "libgithub", "day");
-    // if (res->err_msg != NULL) {
-    //     printf("%s\n", res->err_msg);
-    //     gh_client_response_free(res);
-    //     return 1;
-    // }
-    // printf("%s\n", res->resp);
-    // gh_client_response_free(res);
+    gh_client_response_t *res = gh_client_metrics_page_views("briandowns", "libgithub", "day");
+    if (res->err_msg != NULL) {
+        printf("%s\n", res->err_msg);
+        gh_client_response_free(res);
+        return 1;
+    }
+    printf("%s\n", res->resp);
+    gh_client_response_free(res);
 
     gh_client_free();
     

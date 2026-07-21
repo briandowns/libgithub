@@ -36,7 +36,8 @@
 #include "github.h"
 
 #define GH_REQ_JSON_HEADER "Accept: application/vnd.github+json"
-#define GH_REQ_VER_HEADER  "X-GitHub-Api-Version: 2022-11-28"
+#define GH_REQ_VER_HEADER "X-GitHub-Api-Version: 2022-11-28"
+#define GH_REQ_VER_HEADER_26 "X-GitHub-Api-Version: 2026-03-10"
 #define GH_REQ_STAR_HEADER "Accept: application/vnd.github.star+json"
 
 // the GitHub API requires a user agent to be set so we 
@@ -3002,7 +3003,7 @@ gh_client_code_of_conduct_get_by_key(const char *key)
     gh_client_response_t *response = gh_client_response_new();
 
     if (key == NULL) {
-        response->err_msg = calloc(23, sizeof(char));
+        response->err_msg = calloc(16, sizeof(char));
         strcpy(response->err_msg, "key arg is NULL");
         return response;
     }
