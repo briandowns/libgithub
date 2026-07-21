@@ -17,8 +17,7 @@ LIBDIR  = /usr/local/lib
 ifeq ($(UNAME_S),Darwin)
 $(NAME).dylib: clean
 	$(CC) -dynamiclib -o $@ github.c $(CFLAGS) $(LDFLAGS)
-endif
-ifeq ($(UNAME_S),Linux)
+else
 $(NAME).so: clean
 	$(CC) -shared -o $@ github.c $(CFLAGS) $(LDFLAGS)
 endif
@@ -36,22 +35,18 @@ valgrind: tests
 .PHONY: install
 install: 
 	cp github.h $(INCDIR)
-ifeq ($(UNAME_S),Linux)
-	cp github.h $(INCDIR)
-	cp $(NAME).so $(LIBDIR)
-endif
 ifeq ($(UNAME_S),Darwin)
-	cp github.h $(INCDIR)
 	cp $(NAME).dylib $(LIBDIR)
+else
+	cp $(NAME).so $(LIBDIR)
 endif
 
 uninstall:
 	rm -f $(INCDIR)/github.h
-ifeq ($(UNAME_S),Linux)
-	rm -f $(INCDIR)/$(NAME).so
-endif
 ifeq ($(UNAME_S),Darwin)
-	rm -f $(INCDIR)/$(NAME).dylib
+	rm -f $(LIBDIR)/$(NAME).dylib
+else
+	rm -f $(LIBDIR)/$(NAME).so
 endif
 
 .PHONY: clean
